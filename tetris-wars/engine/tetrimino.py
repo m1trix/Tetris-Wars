@@ -1,4 +1,4 @@
-from grid import Grid
+from engine.grid import Grid
 
 
 class Tetrimino:

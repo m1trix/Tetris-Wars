@@ -1,6 +1,7 @@
-import settings
-import engine
-import renderer
+import engine.settings as settings
+import engine.engine as engine
+import engine.renderer as renderer
+
 import threading
 import time
 

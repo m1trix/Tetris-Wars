@@ -1,6 +1,7 @@
-import grid
-import tetrimino
-import settings
+import engine.grid as grid
+import engine.tetrimino as tetrimino
+import engine.settings as settings
+
 import threading
 import time
 
