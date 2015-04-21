@@ -1,22 +1,17 @@
-import engine.settings as settings
-import engine.engine as engine
-import engine.renderer as renderer
+from engine.settings import Settings
+from engine.engine import Engine
+from console.console_renderer import ConsoleRenderer
 
 import threading
 import time
 
 
 def main():
-    s = settings.Settings()
-    e = engine.Engine(s)
-    r = renderer.ConsoleRenderer(e)
+    s = Settings()
+    r = ConsoleRenderer()
+    e = Engine(s, r)
 
-    th = threading.Thread(target=e.execute)
-    th.start()
-
-    while e.is_running:
-        r.render()
-        time.sleep(0.1)
+    e.execute()
 
 if __name__ == "__main__":
     main()

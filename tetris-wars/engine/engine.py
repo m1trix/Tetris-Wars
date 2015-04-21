@@ -1,8 +1,6 @@
 import engine.grid as grid
 import engine.tetrimino as tetrimino
-import engine.settings as settings
 
-import threading
 import time
 
 from random import randint
@@ -10,7 +8,10 @@ from random import randint
 
 class Engine:
 
-    def __init__(self, settings):
+    def __init__(self, settings, renderer):
+        self.__renderer = renderer
+        self.__renderer.set_engine(self)
+
         self.__width = settings.grid_width
         self.__height = settings.grid_height
         size = max(self.__width, self.__height)
@@ -41,6 +42,7 @@ class Engine:
             else:
                 time.sleep(self.__time)
             self.__step()
+            self.__renderer.render()
 
     def __move_ghost(self):
         self.__ghost.move_to(self.__tetrimino.coords)
@@ -68,8 +70,8 @@ class Engine:
     def execute(self):
         self.__is_running = True
         self.__spawn_tetrimino()
-        progress = threading.Thread(target=self.__progress_game)
-        progress.start()
+        while self.__is_running:
+            self.__progress_game()
 
     @property
     def is_running(self):
