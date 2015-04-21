@@ -2,6 +2,22 @@ from grid import Grid
 
 
 class Tetrimino:
+    """Tetrimino is thare main object of every Tetris game.
+
+    Tetriminos are the 4-piece figures that one must pile
+    in order to achieve victory. There are 7 unique tetriminos.
+    L, J, Z, S, T, I and O tetriminos.
+
+    Each Tetrimino has coordinates - a pair of integers. They
+    represent the global position of the Tetrimino inside the
+    playing grid.
+
+    Each Tetrimino has a square grid of booleans. They have
+    relative coordinates, starting at (0, 0). The grid holds
+    the segments of the Tetrimino and it is large enough for
+    them to be able to rotate inside it.
+
+    """
 
     def __init__(self, coords, segments):
         self.__coords = coords
@@ -41,6 +57,9 @@ class Tetrimino:
         else:
             raise KeyError('Invalid rotation direction "{}"'.format(dir))
 
+    def move_to(self, coords):
+        self.__coords = coords
+
     def move_down(self):
         x, y = self.__coords
         self.__coords = (x, y + 1)
@@ -51,6 +70,7 @@ class Tetrimino:
 
 
 def create(type, coords):
+    """ Factory for the 7 Tetriminos of the game. """
     tetriminos = {
         'L': [(0, 0), (0, 1), (0, 2), (1, 2)],
         'J': [(2, 0), (2, 1), (2, 2), (1, 2)],

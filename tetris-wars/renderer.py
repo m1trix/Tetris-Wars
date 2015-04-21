@@ -25,10 +25,15 @@ class ConsoleRenderer(Renderer):
             for x in range(w):
                 b = self._engine.tetrimino
                 b = b and self._engine.tetrimino.cell((x, y))
-                b = b or self._engine.grid.cell((x, y))
 
-                symbol = b and '@' or ' '
+                b = b or self._engine.grid.cell((x, y))
+                symbol = b and '[]' or '  '
+
+                if not b and self._engine.ghost:
+                    b = self._engine.ghost.cell((x, y))
+                    symbol = b and '::' or '  '
+
                 row += symbol
             print('>|{}|<'.format(row))
-        print('+{}+'.format('-' * w))
-        print(' {} '.format('^' * w))
+        print(' +{}+'.format('--' * w))
+        print('  {} '.format('/\\' * w))

@@ -20,6 +20,7 @@ class Engine:
 
         self.__time = settings.game_speed
         self.__tetrimino = None
+        self.__ghost = None
         self.__is_running = False
 
     def __spawn_tetrimino(self):
@@ -29,6 +30,9 @@ class Engine:
         self.__tetrimino = tetrimino.create(type, (pos_x, 0))
         self.__tetrimino.move_left(self.__tetrimino.size // 2)
 
+        self.__ghost = tetrimino.create(type, (0, 0))
+        self.__move_ghost()
+
     def __progress_game(self):
         while self.is_running:
             if self.__is_soft_drop_active:
@@ -37,8 +41,13 @@ class Engine:
                 time.sleep(self.__time)
             self.__step()
 
+    def __move_ghost(self):
+        self.__ghost.move_to(self.__tetrimino.coords)
+        while self.__can_fall(self.__ghost):
+            self.__ghost.move_down()
+
     def __step(self):
-        if self.__can_tetrimino_fall():
+        if self.__can_fall(self.__tetrimino):
             self.__tetrimino.move_down()
             return
 
@@ -46,10 +55,10 @@ class Engine:
             self.__grid.set(cell)
         self.__spawn_tetrimino()
 
-    def __can_tetrimino_fall(self):
+    def __can_fall(self, tetrimino):
         """Tells if the tetrimino can fall one row
         down inside the current playing grid."""
-        for cell in self.__tetrimino:
+        for cell in tetrimino:
             x, y = cell
             if y + 1 == self.__height or self.__grid.cell((x, y + 1)):
                 return False
@@ -68,6 +77,10 @@ class Engine:
     @property
     def tetrimino(self):
         return self.__tetrimino
+
+    @property
+    def ghost(self):
+        return self.__ghost
 
     @property
     def grid(self):
