@@ -12,7 +12,7 @@ class ConsoleRenderer(Renderer):
                 b = self._engine.tetrimino
                 b = b and self._engine.tetrimino.cell((x, y))
 
-                b = b or self._engine.grid.cell((x, y))
+                b = b or self._engine.grid.get_cell((x, y))
                 symbol = b and '[]' or '  '
 
                 if not b and self._engine.ghost:

@@ -1,4 +1,4 @@
-from engine.grid import Grid
+from engine.grid import *
 
 
 class Tetrimino:
@@ -21,15 +21,16 @@ class Tetrimino:
 
     def __init__(self, coords, segments):
         self.__coords = coords
-        self.__grid = Grid(coords=segments)
+        self.__grid = SpinGrid(segments)
 
     def __iter__(self):
         return iter(self.__get_non_empty_cells())
 
     def __get_non_empty_cells(self):
-        for y in range(self.__grid.size):
-            for x in range(self.__grid.size):
-                if self.__grid.cell((x, y)):
+        w, h = self.__grid.measures
+        for y in range(h):
+            for x in range(w):
+                if self.__grid.get_cell((x, y)):
                     yield (self.coords[0] + x, self.coords[1] + y)
 
     @property
@@ -38,24 +39,19 @@ class Tetrimino:
 
     @property
     def size(self):
-        return self.__grid.size
+        return self.__grid.measures[0]
 
     def cell(self, coords):
         x, y = coords
         x, y = (x - self.__coords[0], y - self.__coords[1])
 
-        if min(x, y) < 0 or max(x, y) >= self.__grid.size:
+        if min(x, y) < 0 or max(x, y) >= self.__grid.measures[0]:
             return False
 
-        return self.__grid.cell((x, y))
+        return self.__grid.get_cell((x, y))
 
     def rotate(self, dir):
-        if(dir == 'left'):
-            self.__grid.rotate_left()
-        elif(dir == 'right'):
-            self.__grid.rotate_right()
-        else:
-            raise KeyError('Invalid rotation direction "{}"'.format(dir))
+        self.__grid.rotate(dir)
 
     def move_to(self, coords):
         self.__coords = coords

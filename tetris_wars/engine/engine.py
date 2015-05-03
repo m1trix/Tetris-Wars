@@ -14,9 +14,7 @@ class Engine:
 
         self.__width = settings.grid_width
         self.__height = settings.grid_height
-        size = max(self.__width, self.__height)
-        self.__grid = grid.Grid(size=size)
-
+        self.__grid = grid.Grid(self.__width, self.__height)
         self.__soft_drop_time = settings.soft_drop_time
         self.__is_soft_drop_active = False
 
@@ -54,8 +52,8 @@ class Engine:
             self.__tetrimino.move_down()
             return
 
-        for cell in self.__tetrimino:
-            self.__grid.set(cell)
+        for coords in self.__tetrimino:
+            self.__grid.set_cell(coords, True)
         self.__spawn_tetrimino()
 
     def __can_fall(self, tetrimino):
@@ -63,7 +61,7 @@ class Engine:
         down inside the current playing grid."""
         for cell in tetrimino:
             x, y = cell
-            if y + 1 == self.__height or self.__grid.cell((x, y + 1)):
+            if y + 1 == self.__height or self.__grid.get_cell((x, y + 1)):
                 return False
         return True
 
