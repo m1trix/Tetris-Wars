@@ -1,8 +1,11 @@
+from engine.utils import *
 from engine.grid import *
+from enum import Enum
 
 
-class Tetrimino:
-    """Tetrimino is thare main object of every Tetris game.
+class Tetrimino(SpinGrid):
+    """
+    The tetrimino is the main object of every Tetris game.
 
     Tetriminos are the 4-piece figures that one must pile
     in order to achieve victory. There are 7 unique tetriminos.
@@ -16,22 +19,33 @@ class Tetrimino:
     relative coordinates, starting at (0, 0). The grid holds
     the segments of the Tetrimino and it is large enough for
     them to be able to rotate inside it.
-
     """
 
+    class Type(Enum):
+        L = 'l'
+        J = 'j'
+        T = 't'
+        I = 'i'
+        S = 's'
+        Z = 'z'
+        O = 'o'
+
+    def create(type, coords):
+        """ Factory method for the 7 Tetriminos of the game. """
+        tetriminos = {
+            Tetrimino.Type.L: [(0, 0), (0, 1), (0, 2), (1, 2)],
+            Tetrimino.Type.J: [(2, 0), (2, 1), (2, 2), (1, 2)],
+            Tetrimino.Type.T: [(0, 0), (1, 0), (2, 0), (1, 1)],
+            Tetrimino.Type.I: [(0, 1), (1, 1), (2, 1), (3, 1)],
+            Tetrimino.Type.S: [(0, 1), (1, 1), (1, 0), (2, 0)],
+            Tetrimino.Type.Z: [(0, 0), (1, 0), (1, 1), (2, 1)],
+            Tetrimino.Type.O: [(0, 0), (0, 1), (1, 0), (1, 1)]
+        }
+        return Tetrimino(coords, tetriminos[type])
+
     def __init__(self, coords, segments):
+        super(Tetrimino, self).__init__(segments)
         self.__coords = coords
-        self.__grid = SpinGrid(segments)
-
-    def __iter__(self):
-        return iter(self.__get_non_empty_cells())
-
-    def __get_non_empty_cells(self):
-        w, h = self.__grid.measures
-        for y in range(h):
-            for x in range(w):
-                if self.__grid.get_cell((x, y)):
-                    yield (self.coords[0] + x, self.coords[1] + y)
 
     @property
     def coords(self):
@@ -39,41 +53,34 @@ class Tetrimino:
 
     @property
     def size(self):
-        return self.__grid.measures[0]
+        return self.measures[0]
 
-    def cell(self, coords):
-        x, y = coords
-        x, y = (x - self.__coords[0], y - self.__coords[1])
+    def _to_relative_coords(self, coords):
+        return tuple_sub(coords, self.__coords)
 
-        if min(x, y) < 0 or max(x, y) >= self.__grid.measures[0]:
+    def get_cell(self, coords):
+        coords = self._to_relative_coords(coords)
+        if min(coords) < 0 or max(coords) >= self.size:
             return False
+        return super(Tetrimino, self).get_cell(coords)
 
-        return self.__grid.get_cell((x, y))
+    def set_cell(self, coords, value):
+        coords = self._to_relative_coords(coords)
+        super(Tetrimino, self).set_cell(coords, value)
 
-    def rotate(self, dir):
-        self.__grid.rotate(dir)
+    def move_relative(self, coords):
+        self.__coords = tuple_add(coords, self.__coords)
 
-    def move_to(self, coords):
+    def move_absolute(self, coords):
         self.__coords = coords
 
-    def move_down(self):
-        x, y = self.__coords
-        self.__coords = (x, y + 1)
+    def __iter__(self):
+        return iter(self.__get_non_empty_cells())
 
-    def move_left(self, times):
-        x, y = self.__coords
-        self.__coords = (x - times, y)
-
-
-def create(type, coords):
-    """ Factory for the 7 Tetriminos of the game. """
-    tetriminos = {
-        'L': [(0, 0), (0, 1), (0, 2), (1, 2)],
-        'J': [(2, 0), (2, 1), (2, 2), (1, 2)],
-        'T': [(0, 0), (1, 0), (2, 0), (1, 1)],
-        'I': [(0, 1), (1, 1), (2, 1), (3, 1)],
-        'S': [(0, 1), (1, 1), (1, 0), (2, 0)],
-        'Z': [(0, 0), (1, 0), (1, 1), (2, 1)],
-        'O': [(0, 0), (0, 1), (1, 0), (1, 1)]
-    }
-    return Tetrimino(coords, tetriminos[type])
+    def __get_non_empty_cells(self):
+        w, h = self.measures
+        for y in range(h):
+            for x in range(w):
+                coords = tuple_add(self.coords, (x, y))
+                if self.get_cell(coords):
+                    yield coords

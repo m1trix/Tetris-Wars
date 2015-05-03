@@ -1,4 +1,4 @@
-from functools import reduce
+from enum import Enum
 
 
 class Grid:
@@ -35,8 +35,10 @@ ROTATION_OPERATORS = [
 ]
 ROTATION_OPERATORS_COUNT = len(ROTATION_OPERATORS)
 
-ROTATION_CLOCKWISE = 'cw'
-ROTATION_COUNTERCLOCKWISE = 'ccw'
+
+class Rotation(Enum):
+    clockwise = 'cw'
+    counterclockwise = 'ccw'
 
 
 class RotationError(Exception):
@@ -47,7 +49,7 @@ class SpinGrid(Grid):
 
     def __init__(self, cells):
         size = self.__calculate_size(cells)
-        Grid.__init__(self, size, size)
+        super(SpinGrid, self).__init__(size, size)
 
         for coords in cells:
             Grid.set_cell(self, coords, True)
@@ -73,10 +75,10 @@ class SpinGrid(Grid):
         return rotation_operator(coords, self._measures[0])
 
     def rotate(self, dir):
-        if dir == ROTATION_CLOCKWISE:
+        if dir == Rotation.clockwise:
             return self.__rotate_grid(1)
 
-        if dir == ROTATION_COUNTERCLOCKWISE:
+        if dir == Rotation.counterclockwise:
             return self.__rotate_grid(-1)
 
         raise RotationError("Unknown rotation dir {}".format(dir))

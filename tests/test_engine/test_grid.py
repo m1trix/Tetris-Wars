@@ -39,36 +39,36 @@ class TestSpinGrid(unittest.TestCase):
         self.assertTrue(self.grid.get_cell((3, 3)))
 
     def test_rotation(self):
-        self.grid.rotate(ROTATION_CLOCKWISE)
+        self.grid.rotate(Rotation.clockwise)
         self.assertFalse(self.grid.get_cell((3, 3)))
         self.assertTrue(self.grid.get_cell((0, 3)))
 
-        self.grid.rotate(ROTATION_CLOCKWISE)
+        self.grid.rotate(Rotation.clockwise)
         self.assertFalse(self.grid.get_cell((0, 3)))
         self.assertTrue(self.grid.get_cell((0, 0)))
 
-        self.grid.rotate(ROTATION_CLOCKWISE)
+        self.grid.rotate(Rotation.clockwise)
         self.assertFalse(self.grid.get_cell((0, 0)))
         self.assertTrue(self.grid.get_cell((3, 0)))
 
-        self.grid.rotate(ROTATION_CLOCKWISE)
+        self.grid.rotate(Rotation.clockwise)
         self.assertFalse(self.grid.get_cell((3, 0)))
         self.assertTrue(self.grid.get_cell((3, 3)))
 
     def test_inverse_rotation(self):
-        self.grid.rotate(ROTATION_COUNTERCLOCKWISE)
+        self.grid.rotate(Rotation.counterclockwise)
         self.assertFalse(self.grid.get_cell((3, 3)))
         self.assertTrue(self.grid.get_cell((3, 0)))
 
-        self.grid.rotate(ROTATION_COUNTERCLOCKWISE)
+        self.grid.rotate(Rotation.counterclockwise)
         self.assertFalse(self.grid.get_cell((3, 0)))
         self.assertTrue(self.grid.get_cell((0, 0)))
 
-        self.grid.rotate(ROTATION_COUNTERCLOCKWISE)
+        self.grid.rotate(Rotation.counterclockwise)
         self.assertFalse(self.grid.get_cell((0, 0)))
         self.assertTrue(self.grid.get_cell((0, 3)))
 
-        self.grid.rotate(ROTATION_COUNTERCLOCKWISE)
+        self.grid.rotate(Rotation.counterclockwise)
         self.assertFalse(self.grid.get_cell((0, 3)))
         self.assertTrue(self.grid.get_cell((3, 3)))
 
@@ -79,10 +79,10 @@ class TestSpinGrid(unittest.TestCase):
         self.grid.set_cell((0, 0), False)
         self.assertFalse(self.grid.get_cell((0, 0)))
 
-        self.grid.rotate(ROTATION_CLOCKWISE)
+        self.grid.rotate(Rotation.clockwise)
         self.grid.set_cell((0, 0), True)
 
-        self.grid.rotate(ROTATION_CLOCKWISE)
+        self.grid.rotate(Rotation.clockwise)
         self.assertTrue(self.grid.get_cell((3, 0)))
 
     def test_invalid_rotation(self):
