@@ -1,7 +1,7 @@
 from engine.settings import Settings
 from engine.engine import Engine
-from console.console_renderer import ConsoleRenderer
-from console.action_listener import ConsoleActionListener
+from graphics.sdl_renderer import SdlRenderer
+from graphics.sdl_listener import SdlActionListener
 
 import threading
 import time
@@ -9,9 +9,9 @@ import time
 
 def main():
     s = Settings()
-    r = ConsoleRenderer()
+    r = SdlRenderer()
     e = Engine(s, r)
-    c = ConsoleActionListener(e.controller)
+    c = SdlActionListener(e.controller)
 
     c.start()
     e.execute()
