@@ -33,6 +33,10 @@ class Engine:
                 self.__outer._hard_drop(self.__outer.tetrimino)
                 self.__outer._is_interrupted = True
                 return
+            elif action == Controller.Action.soft_drop_on:
+                self.__outer.set_soft_drop(True)
+            elif action == Controller.Action.soft_drop_off:
+                self.__outer.set_soft_drop(False)
             else:
                 return
 
@@ -72,6 +76,9 @@ class Engine:
                 return
             time.sleep(0.001)
             ms -= 0.001
+
+    def set_soft_drop(self, b):
+        self.__is_soft_drop_active = b
 
     def __progress_game(self):
         while self.is_running:
