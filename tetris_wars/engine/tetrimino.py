@@ -1,6 +1,7 @@
 from engine.utils import *
 from engine.grid import *
 from enum import Enum
+import copy
 
 
 class Tetrimino(SpinGrid):
@@ -30,6 +31,7 @@ class Tetrimino(SpinGrid):
         Z = 'z'
         O = 'o'
 
+    @staticmethod
     def create(type, coords):
         """ Factory method for the 7 Tetriminos of the game. """
         tetriminos = {
@@ -84,3 +86,56 @@ class Tetrimino(SpinGrid):
                 coords = tuple_add(self.coords, (x, y))
                 if self.get_cell(coords):
                     yield coords
+
+
+class TetriminoUtils:
+
+    @staticmethod
+    def can_move(tetrimino, grid, dir):
+        new_tetrimino = copy.copy(tetrimino)
+        new_tetrimino.move_relative(dir)
+        return not TetriminoUtils.is_placed_wrong(new_tetrimino, grid)
+
+    @staticmethod
+    def is_placed_wrong(tetrimino, grid):
+        width, height = grid.measures
+        for x, y in tetrimino:
+            if x < 0 or x >= width:
+                return True
+            if y < 0 or y >= height:
+                return True
+            if grid.get_cell((x, y)):
+                return True
+        return False
+
+    @staticmethod
+    def hard_drop(tetrimino, grid):
+        while TetriminoUtils.can_move(tetrimino, grid, (0, 1)):
+            tetrimino.move_relative((0, 1))
+
+    @staticmethod
+    def rotate(tetrimino, grid, dir):
+        tetrimino.rotate(dir)
+
+        while TetriminoUtils._is_left_of_grid(tetrimino, grid):
+            tetrimino.move_relative((1, 0))
+
+        while TetriminoUtils._is_right_of_grid(tetrimino, grid):
+            tetrimino.move_relative((-1, 0))
+
+        while TetriminoUtils.is_placed_wrong(tetrimino, grid):
+            tetrimino.move_relative((0, -1))
+
+    @staticmethod
+    def _is_right_of_grid(tetrimino, grid):
+        for x, y in tetrimino:
+            if x >= grid.measures[0]:
+                return True
+        return False
+
+    @staticmethod
+    def _is_left_of_grid(tetrimino, grid):
+        for x, y in tetrimino:
+            if x < 0:
+                return True
+        return False

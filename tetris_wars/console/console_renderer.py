@@ -3,7 +3,7 @@ from engine.renderer import Renderer
 
 class ConsoleRenderer(Renderer):
 
-    def render(self):
+    def _render(self):
         w, h = self._engine.measures
         print("Engine measuers: {}".format((w, h)))
         for y in range(h):

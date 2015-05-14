@@ -8,6 +8,7 @@ import time
 from random import randint
 
 
+#TODO PEP-8
 class Engine:
 
     class EngineController(Controller):
@@ -16,7 +17,7 @@ class Engine:
             self.__outer = outer
 
         def __move_tetrimino(self, dirx, diry):
-            if self.__outer._can_move(self.__outer.tetrimino, (dirx, diry)):
+            if TetriminoUtils.can_move(self.__outer.tetrimino, self.__outer.grid, (dirx, diry)):
                 self.__outer.tetrimino.move_relative((dirx, diry))
 
         def do_action(self, action):
@@ -28,10 +29,11 @@ class Engine:
             elif action == Controller.Action.move_right:
                 self.__move_tetrimino(1, 0)
             elif action == Controller.Action.rotate_clockwise:
-                self.__outer.tetrimino.rotate(Rotation.clockwise)
+                TetriminoUtils.rotate(self.__outer.tetrimino, self.__outer.grid, Rotation.clockwise)
             elif action == Controller.Action.hard_drop:
-                self.__outer._hard_drop(self.__outer.tetrimino)
+                TetriminoUtils.hard_drop(self.__outer.tetrimino, self.__outer.grid)
                 self.__outer._is_interrupted = True
+                self.__outer._is_changed = False
                 return
             elif action == Controller.Action.soft_drop_on:
                 self.__outer.set_soft_drop(True)
@@ -40,11 +42,13 @@ class Engine:
             else:
                 return
 
+            self.__outer._is_changed = True
             self.__outer._move_ghost()
+            self.__outer._renderer.render()
 
     def __init__(self, settings, renderer):
-        self.__renderer = renderer
-        self.__renderer.set_engine(self)
+        self._renderer = renderer
+        self._renderer.set_engine(self)
 
         self.__width = settings.grid_width
         self.__height = settings.grid_height
@@ -52,13 +56,19 @@ class Engine:
         self.__soft_drop_time = settings.soft_drop_time
         self.__is_soft_drop_active = False
 
-        self.__time = settings.game_speed
         self.__tetrimino = None
         self.__ghost = None
         self.__is_running = False
 
         self.__controller = self.EngineController(self)
         self._is_interrupted = False
+        self._is_changed = False
+
+        self._game_timer = 0.0
+        self._game_step_rate = settings.game_speed
+
+        self._render_timer = 0.0
+        self._game_render_rate = 1 / settings.fps
 
     def __spawn_tetrimino(self):
         types = list(Tetrimino.Type)
@@ -81,43 +91,29 @@ class Engine:
         self.__is_soft_drop_active = b
 
     def __progress_game(self):
-        while self.is_running:
+        beg = time.time()
+        if self._game_timer <= 0:
             self.__step()
-            self.__renderer.render()
-            if self.__is_soft_drop_active:
-                self.__wait(self.__soft_drop_time)
-            else:
-                self.__wait(self.__time)
+            self._game_timer = self._game_step_rate
+        if self._render_timer <= 0:
+            self._renderer.render()
+            self._render_timer = self._game_render_rate
+        pause = min(self._game_timer, self._render_timer)
+        self._game_timer -= pause
+        self._render_timer -= pause
+        end = time.time()
+        time.sleep(max(0, pause - end + beg))
 
     def _move_ghost(self):
         self.__ghost = copy.copy(self.__tetrimino)
-        self._hard_drop(self.__ghost)
-
-    def _hard_drop(self, tetrimino):
-        while self._can_move(tetrimino, (0, 1)):
-            tetrimino.move_relative((0, 1))
+        TetriminoUtils.hard_drop(self.__ghost, self.__grid)
 
     def __step(self):
-        if self._can_move(self.__tetrimino, (0, 1)):
+        if TetriminoUtils.can_move(self.__tetrimino, self.__grid, (0, 1)):
             return self.__tetrimino.move_relative((0, 1))
-
         for coords in self.__tetrimino:
             self.__grid.set_cell(coords, True)
         self.__spawn_tetrimino()
-
-    def _can_move(self, tetrimino, dir):
-        """Tells if the tetrimino can fall one row
-        down inside the current playing grid."""
-        dirx, diry = dir
-        for cell in tetrimino:
-            x, y = cell
-            if x + dirx < 0 or x + dirx >= self.__width:
-                return False
-            if y + diry >= self.__height:
-                return False
-            if self.__grid.get_cell((x + dirx, y + diry)):
-                return False
-        return True
 
     def execute(self):
         self.__is_running = True
