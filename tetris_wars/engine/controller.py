@@ -1,43 +1,26 @@
-from enum import Enum
-from engine.tetrimino import Rotation
 from threading import Thread
-
-
-class Controller:
-
-    class Action(Enum):
-        move_left = 'move_left'
-        move_right = 'move_right'
-
-        hard_drop = 'hard_drop'
-        soft_drop_on = 'soft_drop_on'
-        soft_drop_off = 'soft_drop_off'
-
-        rotate_clockwise = 'rotate_clockwise'
-        rotate_counterclockwise = 'rotate_counterclockwise'
-
-    def do_action(self, action):
-        pass
+import time
 
 
 class ActionListener:
 
-    def __init__(self, controller):
-        self.__controller = controller
-        self.__is_running = False
+    def __init__(self, control_unit):
+        self._control_unit = control_unit
+        self._is_running = False
 
     def _detect_action(self):
         pass
 
-    def __loop(self):
-        self.__is_running = True
-        while self.__is_running:
+    def _loop(self):
+        self._is_running = True
+        while self._is_running:
             action = self._detect_action()
-            self.__controller.do_action(action)
+            self._control_unit.do_action(action)
+            time.sleep(0.01)
 
     def start(self):
-        thread = Thread(target=self.__loop)
+        thread = Thread(target=self._loop)
         thread.start()
 
     def stop(self):
-        self.__is_running = False
+        self._is_running = False
