@@ -12,8 +12,8 @@ class Renderer:
 
     def _loop(self):
         while self._is_running:
-            time.sleep(0.033)
             self.render()
+            time.sleep(0.033)
 
     def start(self):
         self._is_running = True

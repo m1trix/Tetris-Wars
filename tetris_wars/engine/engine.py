@@ -14,6 +14,7 @@ class GameCore:
         self.grid = Grid(settings.grid_width, settings.grid_height)
         self.tetrimino = None
         self.tetrimino_ghost = None
+        self._spawn_tetrimino()
 
     def _spawn_tetrimino(self):
         types = list(Tetrimino.Type)
@@ -52,8 +53,9 @@ class RenderUnit:
 
 class ControlUnit:
 
-    def __init__(self, game_core):
+    def __init__(self, game_core, timer_unit):
         self._game_core = game_core
+        self._timer_unit = timer_unit
 
     def _move_tetrimino(self, dirx, diry):
         if TetriminoUtils.can_move(
@@ -75,6 +77,7 @@ class ControlUnit:
         TetriminoUtils.hard_drop(
             self._game_core.tetrimino,
             self._game_core.grid)
+        self._timer_unit.reset()
 
     def do_action(self, action):
         if action == Action.move_left:
@@ -85,36 +88,49 @@ class ControlUnit:
             self._rotate_tetrimino(Rotation.clockwise)
         elif action == Action.hard_drop:
             self._hard_drop()
+        elif action == Action.soft_drop_on:
+            self._timer_unit.soft_drop_on()
+        elif action == Action.soft_drop_off:
+            self._timer_unit.soft_drop_off()
 
 
 class TimerUnit:
 
     def __init__(self, settings):
-        self._timer = 0.0
         self._normal_speed = settings.game_speed
         self._soft_drop_speed = settings.soft_drop_time
         self._game_speed = self._normal_speed
+        self._timer = self._game_speed
+
+    def soft_drop_on(self):
+        self._game_speed = self._soft_drop_speed
+        self.reset()
+
+    def soft_drop_off(self):
+        self._game_speed = self._normal_speed
+        self.reset()
 
     def reset(self):
-        self._timer = 0.0
+        self._timer = 0
 
-    def is_ready(self):
-        return self._timer == 0.0
+    def wait(self):
+        self._timer = int(self._game_speed * 1000)
+        while self._timer > 0:
+            self._timer -= 1
+            time.sleep(0.001)
 
 
-# TODO PEP-8
 class Engine:
 
     def __init__(self, settings):
+        self._timer_unit = TimerUnit(settings)
         self._game_core = GameCore(settings)
         self._render_unit = RenderUnit(self._game_core)
-        self._control_unit = ControlUnit(self._game_core)
-        self._timer_unit = TimerUnit(settings)
+        self._control_unit = ControlUnit(self._game_core, self._timer_unit)
 
     def _progress_game(self):
-        if self._timer_unit.is_ready():
-            self._game_core.do_progress()
-            time.sleep(0.1)
+        self._timer_unit.wait()
+        self._game_core.do_progress()
 
     def execute(self):
         self._is_running = True
