@@ -1,4 +1,5 @@
-from engine.controller import *
+from engine.action import Action
+from engine.controller import ActionListener
 
 
 class ConsoleActionListener(ActionListener):
@@ -7,13 +8,13 @@ class ConsoleActionListener(ActionListener):
         symbol = input()
 
         if symbol == 'a':
-            return Controller.Action.move_left
+            return Action.move_left
 
         if symbol == 'd':
-            return Controller.Action.move_right
+            return Action.move_right
 
         if symbol == 'w':
-            return Controller.Action.rotate_clockwise
+            return Action.rotate_clockwise
 
         if symbol == ' ':
-            return Controller.Action.hard_drop
+            return Action.hard_drop

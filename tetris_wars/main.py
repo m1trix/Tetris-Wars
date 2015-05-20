@@ -2,7 +2,6 @@ from engine.settings import Settings
 from engine.engine import Engine
 from graphics.sdl_renderer import SdlRenderer
 from graphics.sdl_listener import SdlActionListener
-
 import threading
 import time
 

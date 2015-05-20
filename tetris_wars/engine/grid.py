@@ -48,15 +48,15 @@ class RotationError(Exception):
 class SpinGrid(Grid):
 
     def __init__(self, cells):
-        size = self.__calculate_size(cells)
+        size = self._calculate_size(cells)
         super(SpinGrid, self).__init__(size, size)
 
         for coords in cells:
             Grid.set_cell(self, coords, True)
 
-        self.__operator_index = 0
+        self._operator_index = 0
 
-    def __calculate_size(self, cells):
+    def _calculate_size(self, cells):
         w, h = 0, 0
         for x, y in cells:
             w, h = max(w, x), max(h, y)
@@ -71,18 +71,18 @@ class SpinGrid(Grid):
         Grid.set_cell(self, coords, value)
 
     def _rotate_coords(self, coords):
-        rotation_operator = ROTATION_OPERATORS[self.__operator_index]
+        rotation_operator = ROTATION_OPERATORS[self._operator_index]
         return rotation_operator(coords, self._measures[0])
 
     def rotate(self, dir):
         if dir == Rotation.clockwise:
-            return self.__rotate_grid(1)
+            return self._rotate_grid(1)
 
         if dir == Rotation.counterclockwise:
-            return self.__rotate_grid(-1)
+            return self._rotate_grid(-1)
 
         raise RotationError("Unknown rotation dir {}".format(dir))
 
-    def __rotate_grid(self, dir):
-        self.__operator_index += ROTATION_OPERATORS_COUNT + dir
-        self.__operator_index %= ROTATION_OPERATORS_COUNT
+    def _rotate_grid(self, dir):
+        self._operator_index += ROTATION_OPERATORS_COUNT + dir
+        self._operator_index %= ROTATION_OPERATORS_COUNT

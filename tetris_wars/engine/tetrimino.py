@@ -47,18 +47,18 @@ class Tetrimino(SpinGrid):
 
     def __init__(self, coords, segments):
         super(Tetrimino, self).__init__(segments)
-        self.__coords = coords
+        self._coords = coords
 
     @property
     def coords(self):
-        return self.__coords
+        return self._coords
 
     @property
     def size(self):
         return self.measures[0]
 
     def _to_relative_coords(self, coords):
-        return tuple_sub(coords, self.__coords)
+        return tuple_sub(coords, self._coords)
 
     def get_cell(self, coords):
         coords = self._to_relative_coords(coords)
@@ -71,15 +71,15 @@ class Tetrimino(SpinGrid):
         super(Tetrimino, self).set_cell(coords, value)
 
     def move_relative(self, coords):
-        self.__coords = tuple_add(coords, self.__coords)
+        self._coords = tuple_add(coords, self._coords)
 
     def move_absolute(self, coords):
-        self.__coords = coords
+        self._coords = coords
 
     def __iter__(self):
-        return iter(self.__get_non_empty_cells())
+        return iter(self._get_non_empty_cells())
 
-    def __get_non_empty_cells(self):
+    def _get_non_empty_cells(self):
         w, h = self.measures
         for y in range(h):
             for x in range(w):
