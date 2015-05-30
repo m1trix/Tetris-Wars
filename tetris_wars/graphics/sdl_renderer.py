@@ -17,7 +17,7 @@ class SdlRenderer(Renderer):
         self._surface = self._window.get_surface()
 
     def render(self):
-        grid, tetrimino, ghost = self._render_unit.get_snapshot()
+        grid, tetrimino, ghost = self._renderer_core.get_snapshot()
         w, h = grid.measures
         for y in range(h):
             for x in range(w):

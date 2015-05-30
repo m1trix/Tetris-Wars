@@ -1,11 +1,25 @@
 from threading import Thread
 import time
+import copy
+
+
+class RendererCore:
+
+    def __init__(self, game_core):
+        self._game_core = game_core
+
+    def get_snapshot(self):
+        return (
+            copy.copy(self._game_core.grid),
+            copy.copy(self._game_core.tetrimino),
+            copy.copy(self._game_core.tetrimino_ghost)
+        )
 
 
 class Renderer:
 
-    def set_render_unit(self, render_unit):
-        self._render_unit = render_unit
+    def set_renderer_core(self, renderer_core):
+        self._renderer_core = renderer_core
 
     def render(self):
         return

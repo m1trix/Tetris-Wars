@@ -9,8 +9,8 @@ import time
 def main():
     e = Engine(Settings())
     r = SdlRenderer()
-    r.set_render_unit(e.render_unit)
-    c = SdlActionListener(e.control_unit)
+    r.set_renderer_core(e.renderer_core)
+    c = SdlActionListener(e.controller)
 
     r.start()
     c.start()
