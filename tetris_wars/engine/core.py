@@ -1,4 +1,5 @@
 from engine.tetrimino import *
+from engine.grid import GridUtils
 from random import randint
 
 
@@ -24,9 +25,15 @@ class GameCore:
         self.tetrimino_ghost = copy.copy(self.tetrimino)
         TetriminoUtils.hard_drop(self.tetrimino_ghost, self.grid)
 
+    def _clear_lines(self):
+        lines = GridUtils.get_full_lines(self.grid)
+        if lines:
+            GridUtils.clear_full_lines(self.grid, lines)
+
     def do_progress(self):
         if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
             return self.tetrimino.move_relative((0, 1))
         for (coords, value) in self.tetrimino:
             self.grid.set_cell(coords, value)
+        self._clear_lines()
         self._spawn_tetrimino()

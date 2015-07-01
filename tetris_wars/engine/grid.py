@@ -86,3 +86,30 @@ class SpinGrid(Grid):
     def _rotate_grid(self, dir):
         self._operator_index += ROTATION_OPERATORS_COUNT + dir
         self._operator_index %= ROTATION_OPERATORS_COUNT
+
+
+class GridUtils:
+
+    @staticmethod
+    def get_full_lines(grid):
+        w, h = grid.measures
+        result = []
+        for y in range(h):
+            is_full = True
+            for x in range(w):
+                is_full = grid.get_cell((x, y)) and is_full
+            if is_full:
+                result.append(y)
+        return result
+
+    @staticmethod
+    def clear_full_lines(grid, lines):
+        counter = grid.measures[1] - 1
+        i = len(lines) - 1
+        for y in range(grid.measures[1] - 1, -1, -1):
+            if i >= 0 and y == lines[i]:
+                i -= 1
+                continue
+            for x in range(grid.measures[0]):
+                grid.set_cell((x, counter), grid.get_cell((x, y)))
+            counter -= 1

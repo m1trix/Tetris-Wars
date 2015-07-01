@@ -30,7 +30,7 @@ class TestGrid(unittest.TestCase):
 class TestSpinGrid(unittest.TestCase):
 
     def setUp(self):
-        self.grid = SpinGrid([(3, 3)])
+        self.grid = SpinGrid([(3, 3)], True)
 
     def test_initialization(self):
         w, h = self.grid.measures
@@ -88,3 +88,33 @@ class TestSpinGrid(unittest.TestCase):
     def test_invalid_rotation(self):
         with self.assertRaises(RotationError):
             self.grid.rotate("arround")
+
+
+class TestGridUtils(unittest.TestCase):
+
+    def setUp(self):
+        self.grid = Grid(4, 8)
+
+    def test_get_full_lines(self):
+        full_lines = list(GridUtils.get_full_lines(self.grid))
+        self.assertEqual(full_lines, [])
+
+        self.grid.set_cell((0, 4), True)
+        self.grid.set_cell((1, 4), True)
+        self.grid.set_cell((2, 4), True)
+        self.grid.set_cell((3, 4), True)
+
+        self.grid.set_cell((1, 2), True)
+        self.grid.set_cell((2, 2), True)
+        self.grid.set_cell((3, 2), True)
+
+        full_lines = list(GridUtils.get_full_lines(self.grid))
+        self.assertEqual(full_lines, [4])
+
+        self.grid.set_cell((0, 6), True)
+        self.grid.set_cell((1, 6), True)
+        self.grid.set_cell((2, 6), True)
+        self.grid.set_cell((3, 6), True)
+
+        full_lines = list(GridUtils.get_full_lines(self.grid))
+        self.assertEqual(full_lines, [4, 6])
