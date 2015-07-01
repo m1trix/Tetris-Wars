@@ -1,5 +1,5 @@
 import unittest
-from tetris_wars.engine.grid import *
+from engine.grid import *
 
 
 class TestGrid(unittest.TestCase):

@@ -1,8 +1,8 @@
 import unittest
-from tetris_wars.engine.tetrimino import *
+from engine.tetrimino import *
 
 
-class TestTetriminoUtils(unittest.TestUtils):
+class TestTetriminoUtils(unittest.TestCase):
 
     def setUp(self):
         self.grid = Grid(10, 20)
