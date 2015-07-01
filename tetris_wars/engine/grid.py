@@ -11,7 +11,7 @@ class Grid:
         cells = []
         w, h = measures
         for y in range(h):
-            cells.append([False] * w)
+            cells.append([None] * w)
         return cells
 
     def get_cell(self, coords):
@@ -47,12 +47,12 @@ class RotationError(Exception):
 
 class SpinGrid(Grid):
 
-    def __init__(self, cells):
+    def __init__(self, cells, default_cell):
         size = self._calculate_size(cells)
         super(SpinGrid, self).__init__(size, size)
 
         for coords in cells:
-            Grid.set_cell(self, coords, True)
+            Grid.set_cell(self, coords, default_cell)
 
         self._operator_index = 0
 

@@ -4,6 +4,16 @@ from enum import Enum
 import copy
 
 
+class Segment:
+
+    def __init__(self, color):
+        self._color = color
+
+    @property
+    def color(self):
+        return self.color
+
+
 class Tetrimino(SpinGrid):
     """
     The tetrimino is the main object of every Tetris game.
@@ -43,10 +53,10 @@ class Tetrimino(SpinGrid):
             Tetrimino.Type.Z: [(0, 0), (1, 0), (1, 1), (2, 1)],
             Tetrimino.Type.O: [(0, 0), (0, 1), (1, 0), (1, 1)]
         }
-        return Tetrimino(coords, tetriminos[type])
+        return Tetrimino(coords, tetriminos[type], type)
 
-    def __init__(self, coords, segments):
-        super(Tetrimino, self).__init__(segments)
+    def __init__(self, coords, segments, default_cell):
+        super(Tetrimino, self).__init__(segments, default_cell)
         self._coords = coords
 
     @property
@@ -85,7 +95,7 @@ class Tetrimino(SpinGrid):
             for x in range(w):
                 coords = tuple_add(self.coords, (x, y))
                 if self.get_cell(coords):
-                    yield coords
+                    yield (coords, self.get_cell(coords))
 
 
 class TetriminoUtils:
@@ -99,7 +109,7 @@ class TetriminoUtils:
     @staticmethod
     def is_placed_wrong(tetrimino, grid):
         width, height = grid.measures
-        for x, y in tetrimino:
+        for ((x, y), _) in tetrimino:
             if x < 0 or x >= width:
                 return True
             if y < 0 or y >= height:
@@ -128,14 +138,14 @@ class TetriminoUtils:
 
     @staticmethod
     def _is_right_of_grid(tetrimino, grid):
-        for x, y in tetrimino:
+        for ((x, y), _) in tetrimino:
             if x >= grid.measures[0]:
                 return True
         return False
 
     @staticmethod
     def _is_left_of_grid(tetrimino, grid):
-        for x, y in tetrimino:
+        for ((x, y), _) in tetrimino:
             if x < 0:
                 return True
         return False

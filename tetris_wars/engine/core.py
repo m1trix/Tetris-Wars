@@ -27,6 +27,6 @@ class GameCore:
     def do_progress(self):
         if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
             return self.tetrimino.move_relative((0, 1))
-        for coords in self.tetrimino:
-            self.grid.set_cell(coords, True)
+        for (coords, value) in self.tetrimino:
+            self.grid.set_cell(coords, value)
         self._spawn_tetrimino()
