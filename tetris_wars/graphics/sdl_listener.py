@@ -45,6 +45,9 @@ class SdlActionListener(ActionListener):
                 elif event.key.keysym.sym == SDLK_SPACE:
                     yield Action.hard_drop
 
+                elif event.key.keysym.sym == ord('c'):
+                    yield Action.hold
+
         if self._key_left:
             yield Action.move_left
         if self._key_right:

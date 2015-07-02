@@ -8,17 +8,16 @@ import time
 
 def main():
     e = Engine(Settings())
-    r = SdlRenderer()
-    r.set_renderer_core(e.renderer_core)
+    r = SdlRenderer(e.renderer_core)
     c = SdlActionListener(e.controller)
 
-    r.start()
     c.start()
+    r.start()
 
     e.execute()
 
-    c.stop()
     r.stop()
+    c.stop()
 
 if __name__ == "__main__":
     main()

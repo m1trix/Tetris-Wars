@@ -46,6 +46,8 @@ class Controller:
             self._timer.soft_drop_on()
         elif action == Action.soft_drop_off:
             self._timer.soft_drop_off()
+        elif action == Action.hold:
+            self._game_core.hold_tetrimino()
 
 
 class ActionListener:

@@ -149,3 +149,14 @@ class TetriminoUtils:
             if x < 0:
                 return True
         return False
+
+    @staticmethod
+    def calculate_actual_measures(tetrimino):
+        maxx, maxy = 0, 0
+        minx, miny = 4, 4
+        for (x, y), _ in tetrimino:
+            maxx = max(maxx, x)
+            maxy = max(maxy, y)
+            minx = min(minx, x)
+            miny = min(miny, y)
+        return (minx, miny, maxx - minx + 1, maxy - miny + 1)

@@ -11,3 +11,5 @@ class Action(Enum):
 
     rotate_clockwise = 'rotate_clockwise'
     rotate_counterclockwise = 'rotate_counterclockwise'
+
+    hold = 'hold'

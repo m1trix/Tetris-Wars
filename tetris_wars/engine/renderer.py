@@ -12,13 +12,14 @@ class RendererCore:
         return (
             copy.copy(self._game_core.grid),
             copy.copy(self._game_core.tetrimino),
-            copy.copy(self._game_core.tetrimino_ghost)
+            copy.copy(self._game_core.tetrimino_ghost),
+            copy.copy(self._game_core.tetrimino_hold)
         )
 
 
 class Renderer:
 
-    def set_renderer_core(self, renderer_core):
+    def __init__(self, renderer_core):
         self._renderer_core = renderer_core
 
     def render(self):
