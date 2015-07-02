@@ -1,6 +1,7 @@
 from engine.tetrimino import *
 from engine.grid import GridUtils
 from random import randint
+from queue import Queue
 
 
 class GameCore:
@@ -10,19 +11,30 @@ class GameCore:
         self.tetrimino = None
         self.tetrimino_hold = None
         self.tetrimino_ghost = None
+        self.queue = []
         self._can_hold = False
+
+        self._fill_queue(settings.queue_size)
         self._spawn_tetrimino()
+
+    def _fill_queue(self, count):
+        for i in range(count):
+            self.queue.append(self._create_random_tetrimino())
 
     def _reset_tetrimino_position(self):
         pos_x = self.grid.measures[0] // 2
         self.tetrimino.move_absolute((pos_x, 0))
         self.tetrimino.move_relative((-self.tetrimino.size // 2, 0))
 
-    def _spawn_tetrimino(self):
+    def _create_random_tetrimino(self):
         types = list(Tetrimino.Type)
         type = types[randint(0, len(types) - 1)]
+        return Tetrimino.create(type, (0, 0))
 
-        self.tetrimino = Tetrimino.create(type, (0, 0))
+    def _spawn_tetrimino(self):
+        self.tetrimino = self.queue[0]
+        self.queue.append(self._create_random_tetrimino())
+        self.queue = self.queue[1:]
         self._reset_tetrimino_position()
 
         self.refresh_ghost_tetrimino()

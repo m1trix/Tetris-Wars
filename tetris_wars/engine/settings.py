@@ -6,3 +6,4 @@ class Settings:
         self.game_speed = 0.25
         self.soft_drop_time = 0.05
         self.fps = 30.0
+        self.queue_size = 5

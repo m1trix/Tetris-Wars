@@ -13,7 +13,8 @@ class RendererCore:
             copy.copy(self._game_core.grid),
             copy.copy(self._game_core.tetrimino),
             copy.copy(self._game_core.tetrimino_ghost),
-            copy.copy(self._game_core.tetrimino_hold)
+            copy.copy(self._game_core.tetrimino_hold),
+            copy.copy(self._game_core.queue)
         )
 
 
