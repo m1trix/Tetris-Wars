@@ -6,12 +6,15 @@ import copy
 
 class Segment:
 
-    def __init__(self, color):
-        self._color = color
+    def __init__(self, type, owner):
+        self._type = type
+        self._owner = owner
 
-    @property
-    def color(self):
-        return self.color
+    def get_type(self):
+        return self._type
+
+    def get_owner(self):
+        return self._owner
 
 
 class Tetrimino(SpinGrid):
@@ -55,8 +58,8 @@ class Tetrimino(SpinGrid):
         }
         return Tetrimino(coords, tetriminos[type], type)
 
-    def __init__(self, coords, segments, default_cell):
-        super(Tetrimino, self).__init__(segments, default_cell)
+    def __init__(self, coords, segments, type):
+        super(Tetrimino, self).__init__(segments, Segment(type, self))
         self._coords = coords
 
     @property
