@@ -108,7 +108,7 @@ class TetriminoUtils:
     @staticmethod
     def is_placed_wrong(tetrimino, grid):
         width, height = grid.measures
-        for ((x, y), _) in tetrimino:
+        for (x, y), _ in tetrimino:
             if x < 0 or x >= width:
                 return True
             if y < 0 or y >= height:

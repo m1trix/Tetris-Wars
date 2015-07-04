@@ -9,12 +9,11 @@ class Engine:
     def __init__(self, settings):
         self._timer = Timer(settings)
         self._game_core = GameCore(settings)
-        self._renderer_core = RendererCore(self._game_core)
         self._controller = Controller(self._game_core, self._timer)
 
     def _progress_game(self):
         self._timer.wait()
-        self._game_core.do_progress()
+        self._is_running = self._game_core.do_progress()
 
     def execute(self):
         self._is_running = True
@@ -28,4 +27,4 @@ class Engine:
 
     @property
     def renderer_core(self):
-        return self._renderer_core
+        return self._game_core.renderer_core

@@ -3,6 +3,8 @@ from engine.grid import GridUtils
 from random import randint
 from collections import deque
 from engine.gravity import GravityEngine
+from engine.renderer import RendererCore
+from engine.renderer import RenderRequest
 import time
 
 
@@ -25,6 +27,7 @@ class GameCore:
 
         self._can_hold = False
         self._spawn_tetrimino()
+        self.renderer_core = RendererCore(settings, self)
 
     def _fill_queue(self, count):
         for i in range(count):
@@ -47,6 +50,7 @@ class GameCore:
 
         self.refresh_ghost_tetrimino()
         self._can_hold = True
+        return TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1))
 
     def refresh_ghost_tetrimino(self):
         self.tetrimino_ghost = copy.copy(self.tetrimino)
@@ -56,7 +60,9 @@ class GameCore:
         lines = GridUtils.get_full_lines(self.grid)
         if not lines:
             return False
-        time.sleep(self._game_speed)
+        w, h = self.grid.measures
+        self.renderer_core.make_render_request(
+            (RenderRequest.line_clear, (w, h, lines)))
         if self._use_gravity:
             GridUtils.clear_lines(self.grid, lines)
             self._gravity.regenerate_grid()
@@ -80,22 +86,39 @@ class GameCore:
 
     def do_progress(self):
         if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
-            return self.tetrimino.move_relative((0, 1))
-        for (coords, value) in self.tetrimino:
+            self.tetrimino.move_relative((0, 1))
+            self.render()
+            return True
+
+        for coords, value in self.tetrimino:
             self.grid.set_cell(coords, value)
         self.tetrimino = None
         self.tetrimino_ghost = None
+
         if self._clear_lines() and self._use_gravity:
+            self.render()
             time.sleep(self._gravity_speed)
             self._progress_gravity()
-        self._spawn_tetrimino()
+
+        self.render()
+        return self._spawn_tetrimino()
 
     def _progress_gravity(self):
         change = True
         while change:
             change = False
             while self._gravity.do_progress():
+                self.render()
                 time.sleep(self._gravity_speed)
                 change = True
             if self._clear_lines():
                 time.sleep(self._gravity_speed)
+
+    def render(self):
+        self.renderer_core.make_render_request(
+            (RenderRequest.full,
+                (copy.copy(self.grid),
+                    copy.copy(self.tetrimino),
+                    copy.copy(self.tetrimino_ghost),
+                    copy.copy(self.tetrimino_hold),
+                    copy.copy(self.queue))))

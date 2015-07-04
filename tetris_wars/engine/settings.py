@@ -7,5 +7,6 @@ class Settings:
         self.game_speed = 0.25
         self.gravity_speed = 0.25
         self.soft_drop_time = 0.05
+        self.line_clear_speed = 0.20
         self.fps = 30.0
         self.queue_size = 5

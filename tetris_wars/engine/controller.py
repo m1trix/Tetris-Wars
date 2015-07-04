@@ -50,6 +50,7 @@ class Controller:
             self._timer.soft_drop_off()
         elif action == Action.hold:
             self._game_core.hold_tetrimino()
+        self._game_core.render()
 
 
 class ActionListener:
