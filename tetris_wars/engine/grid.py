@@ -103,7 +103,14 @@ class GridUtils:
         return result
 
     @staticmethod
-    def clear_full_lines(grid, lines):
+    def clear_lines(grid, lines):
+        w, h = grid.measures
+        for y in lines:
+            for x in range(w):
+                grid.set_cell((x, y), None)
+
+    @staticmethod
+    def remove_lines(grid, lines):
         counter = grid.measures[1] - 1
         i = len(lines) - 1
         for y in range(grid.measures[1] - 1, -1, -1):

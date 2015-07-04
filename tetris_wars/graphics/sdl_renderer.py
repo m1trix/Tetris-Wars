@@ -112,14 +112,15 @@ class SdlRenderer(Renderer):
             self._surface,
             SDL_Rect(xfr, yfr, w, h),
             color)
-        if x > 0 and grid.get_cell((x - 1, y)) and grid.get_cell((x - 1, y)).get_owner() == segment.get_owner():
+        if x > 0 and grid.get_cell((x - 1, y)) and grid.get_cell((x - 1, y)) == segment:
             SDL_FillRect(self._surface, SDL_Rect(xfr - 1, yfr, 1, h), color)
-        if y > 0 and grid.get_cell((x, y - 1)) and grid.get_cell((x, y - 1)).get_owner() == segment.get_owner():
+        if y > 0 and grid.get_cell((x, y - 1)) and grid.get_cell((x, y - 1)) == segment:
             SDL_FillRect(self._surface, SDL_Rect(xfr, yfr - 1, w, 1), color)
 
     def render(self):
         self._render_frame()
-        grid, tetrimino, ghost, hold, queue = self._renderer_core.get_snapshot()
+        snapshot = self._renderer_core.get_snapshot()
+        grid, tetrimino, ghost, hold, queue = snapshot
         w, h = grid.measures
         self._render_hold(hold)
         self._render_queue(queue)
@@ -135,9 +136,9 @@ class SdlRenderer(Renderer):
             for x in range(w):
                 sx, sy = ((x + GRID_X_OFFSET) * SQUARE_SIZE,
                           (y + GRID_Y_OFFSET) * SQUARE_SIZE)
-                if tetrimino.get_cell((x, y)):
+                if tetrimino and tetrimino.get_cell((x, y)):
                     self._smart_render(tetrimino, (x, y), (sx, sy), None, SQUARE_SIZE)
-                elif ghost.get_cell((x, y)):
+                elif ghost and ghost.get_cell((x, y)):
                     self._smart_render(ghost, (x, y), (sx, sy), GHOST_COLOR, SQUARE_SIZE)
                 elif grid.get_cell((x, y)):
                     self._smart_render(grid, (x, y), (sx, sy), None, SQUARE_SIZE)

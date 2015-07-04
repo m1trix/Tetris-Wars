@@ -34,6 +34,8 @@ class Controller:
         self._timer.reset()
 
     def do_action(self, action):
+        if not self._game_core.tetrimino:
+            return
         if action == Action.move_left:
             self._move_tetrimino(-1, 0)
         elif action == Action.move_right:

@@ -1,7 +1,9 @@
 from engine.tetrimino import *
 from engine.grid import GridUtils
 from random import randint
-from queue import Queue
+from collections import deque
+from engine.gravity import GravityEngine
+import time
 
 
 class GameCore:
@@ -11,10 +13,17 @@ class GameCore:
         self.tetrimino = None
         self.tetrimino_hold = None
         self.tetrimino_ghost = None
-        self.queue = []
-        self._can_hold = False
 
+        self.queue = deque([])
         self._fill_queue(settings.queue_size)
+
+        self._game_speed = settings.game_speed
+        self._gravity_speed = settings.gravity_speed
+        self._use_gravity = settings.use_gravity
+        if self._use_gravity:
+            self._gravity = GravityEngine(self.grid)
+
+        self._can_hold = False
         self._spawn_tetrimino()
 
     def _fill_queue(self, count):
@@ -32,9 +41,8 @@ class GameCore:
         return Tetrimino.create(type, (0, 0))
 
     def _spawn_tetrimino(self):
-        self.tetrimino = self.queue[0]
+        self.tetrimino = self.queue.popleft()
         self.queue.append(self._create_random_tetrimino())
-        self.queue = self.queue[1:]
         self._reset_tetrimino_position()
 
         self.refresh_ghost_tetrimino()
@@ -46,8 +54,14 @@ class GameCore:
 
     def _clear_lines(self):
         lines = GridUtils.get_full_lines(self.grid)
-        if lines:
-            GridUtils.clear_full_lines(self.grid, lines)
+        if not lines:
+            return False
+        time.sleep(self._game_speed)
+        if self._use_gravity:
+            GridUtils.clear_lines(self.grid, lines)
+            self._gravity.regenerate_grid()
+        GridUtils.remove_lines(self.grid, lines)
+        return True
 
     def hold_tetrimino(self):
         if not self._can_hold:
@@ -69,5 +83,19 @@ class GameCore:
             return self.tetrimino.move_relative((0, 1))
         for (coords, value) in self.tetrimino:
             self.grid.set_cell(coords, value)
-        self._clear_lines()
+        self.tetrimino = None
+        self.tetrimino_ghost = None
+        if self._clear_lines() and self._use_gravity:
+            time.sleep(self._gravity_speed)
+            self._progress_gravity()
         self._spawn_tetrimino()
+
+    def _progress_gravity(self):
+        change = True
+        while change:
+            change = False
+            while self._gravity.do_progress():
+                time.sleep(self._gravity_speed)
+                change = True
+            if self._clear_lines():
+                time.sleep(self._gravity_speed)
