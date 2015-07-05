@@ -27,11 +27,17 @@ class Controller:
             dir)
         self._game_core.refresh_ghost_tetrimino()
 
+        easy_spin = self._game_core.easy_spin
+        easy_spin and easy_spin.is_active() and easy_spin.add_cycle()
+
     def _hard_drop(self):
         TetriminoUtils.hard_drop(
             self._game_core.tetrimino,
             self._game_core.grid)
-        self._timer.reset()
+        self._timer.turn_off()
+
+        easy_spin = self._game_core.easy_spin
+        easy_spin and easy_spin.hard_drop()
 
     def do_action(self, action):
         if not self._game_core.tetrimino:

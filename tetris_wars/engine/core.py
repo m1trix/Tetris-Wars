@@ -5,6 +5,7 @@ from collections import deque
 from engine.gravity import GravityEngine
 from engine.renderer import RendererCore
 from engine.renderer import RenderRequest
+from engine.easy_spin import EasySpinEngine
 import time
 
 
@@ -15,8 +16,14 @@ class GameCore:
         self.tetrimino = None
         self.tetrimino_hold = None
         self.tetrimino_ghost = None
-
         self.queue = deque([])
+        self.renderer_core = RendererCore(settings, self)
+
+        self._use_easy_spin = settings.use_easy_spin
+        self.easy_spin = None
+        if self._use_easy_spin:
+            self.easy_spin = EasySpinEngine(settings)
+
         self._fill_queue(settings.queue_size)
 
         self._game_speed = settings.game_speed
@@ -27,7 +34,6 @@ class GameCore:
 
         self._can_hold = False
         self._spawn_tetrimino()
-        self.renderer_core = RendererCore(settings, self)
 
     def _fill_queue(self, count):
         for i in range(count):
@@ -89,6 +95,10 @@ class GameCore:
             self.tetrimino.move_relative((0, 1))
             self.render()
             return True
+
+        if self._use_easy_spin:
+            self.easy_spin.reset()
+            self.easy_spin.start_countdown()
 
         for coords, value in self.tetrimino:
             self.grid.set_cell(coords, value)

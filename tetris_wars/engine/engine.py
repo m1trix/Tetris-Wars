@@ -1,4 +1,4 @@
-from engine.timer import Timer
+from engine.timer import GameTimer
 from engine.core import GameCore
 from engine.renderer import RendererCore
 from engine.controller import Controller
@@ -7,7 +7,7 @@ from engine.controller import Controller
 class Engine:
 
     def __init__(self, settings):
-        self._timer = Timer(settings)
+        self._timer = GameTimer(settings)
         self._game_core = GameCore(settings)
         self._controller = Controller(self._game_core, self._timer)
 
