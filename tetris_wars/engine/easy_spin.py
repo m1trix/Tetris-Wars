@@ -1,7 +1,7 @@
 from engine.timer import Timer
 
 
-class EasySpinEngine:
+class EasySpinCore:
 
     def __init__(self, settings):
         self._limit = settings.easy_spin_limit

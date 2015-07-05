@@ -7,9 +7,10 @@ import time
 
 class Controller:
 
-    def __init__(self, game_core, timer):
-        self._game_core = game_core
-        self._timer = timer
+    def __init__(self, core_units):
+        self._game_core = core_units[0]
+        self._easy_spin_core = core_units[1]
+        self._timer = core_units[2]
 
     def _move_tetrimino(self, dirx, diry):
         if TetriminoUtils.can_move(
@@ -20,24 +21,27 @@ class Controller:
             self._game_core.tetrimino.move_relative((dirx, diry))
             self._game_core.refresh_ghost_tetrimino()
 
+    def _trigger_easy_spin(self):
+        core = self._easy_spin_core
+        core and core.is_active() and core.add_cycle()
+
     def _rotate_tetrimino(self, dir):
         TetriminoUtils.rotate(
             self._game_core.tetrimino,
             self._game_core.grid,
             dir)
         self._game_core.refresh_ghost_tetrimino()
-
-        easy_spin = self._game_core.easy_spin
-        easy_spin and easy_spin.is_active() and easy_spin.add_cycle()
+        self._trigger_easy_spin()
 
     def _hard_drop(self):
         TetriminoUtils.hard_drop(
             self._game_core.tetrimino,
             self._game_core.grid)
         self._timer.turn_off()
+        self._cancel_easy_spin()
 
-        easy_spin = self._game_core.easy_spin
-        easy_spin and easy_spin.hard_drop()
+    def _cancel_easy_spin(self):
+        self._easy_spin_core and self._easy_spin_core.hard_drop()
 
     def do_action(self, action):
         if not self._game_core.tetrimino:
@@ -56,7 +60,7 @@ class Controller:
             self._timer.soft_drop_off()
         elif action == Action.hold:
             self._game_core.hold_tetrimino()
-        self._game_core.render()
+        self._game_core.trigger_render()
 
 
 class ActionListener:

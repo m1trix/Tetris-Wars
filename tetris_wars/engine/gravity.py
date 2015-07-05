@@ -3,33 +3,29 @@ from engine.tetrimino import Segment
 from engine.grid import Grid
 
 
-class GravityEngine:
+class GravityCore:
 
     def __init__(self, grid):
         self._grid = grid
         w, h = grid.measures
-        self._floating = Grid(w, h)
+        self._marked_segments = Grid(w, h)
 
     def regenerate_grid(self):
         w, h = self._grid.measures
-        self._floating = Grid(w, h)
+        self._marked_segments = Grid(w, h)
         for y in range(h):
             for x in range(w):
                 segment = self._grid.get_cell((x, y))
-                if not segment or self._floating.get_cell((x, y)):
+                if not segment or self._marked_segments.get_cell((x, y)):
                     continue
                 new_segment = Segment(segment.get_type())
                 for x, y in self._calculate_group(x, y, segment):
                     self._grid.set_cell((x, y), new_segment)
-                    self._floating.set_cell((x, y), True)
+                    self._marked_segments.set_cell((x, y), True)
 
     def do_progress(self):
         w, h = self._grid.measures
         self._calculate_floating_segments()
-        return self._fall_once()
-
-    def _fall_once(self):
-        w, h = self._grid.measures
         change = False
         for y in range(h - 2, -1, -1):
             for x in range(w):
@@ -42,7 +38,7 @@ class GravityEngine:
 
     def _calculate_floating_segments(self):
         w, h = self._grid.measures
-        self._floating = Grid(w, h)
+        self._marked_segments = Grid(w, h)
         for y in range(h):
             for x in range(w):
                 segment = self._grid.get_cell((x, y))
@@ -51,7 +47,7 @@ class GravityEngine:
                 self._can_segment_fall(x, y, segment)
 
     def _can_segment_fall(self, x, y, segment):
-        if self._floating.get_cell((x, y)):
+        if self._marked_segments.get_cell((x, y)):
             return True
         w, h = self._grid.measures
         group = self._calculate_group(x, y, segment)
@@ -68,7 +64,7 @@ class GravityEngine:
             if not self._can_segment_fall(x, y + 1, under):
                 return False
         for x, y in group:
-            self._floating.set_cell((x, y), True)
+            self._marked_segments.set_cell((x, y), True)
         return True
 
     def _calculate_group(self, x, y, segment):

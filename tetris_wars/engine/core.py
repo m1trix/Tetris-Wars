@@ -2,37 +2,30 @@ from engine.tetrimino import *
 from engine.grid import GridUtils
 from random import randint
 from collections import deque
-from engine.gravity import GravityEngine
+from engine.gravity import GravityCore
 from engine.renderer import RendererCore
 from engine.renderer import RenderRequest
-from engine.easy_spin import EasySpinEngine
+from engine.easy_spin import EasySpinCore
 import time
 
 
 class GameCore:
 
-    def __init__(self, settings):
-        self.grid = Grid(settings.grid_width, settings.grid_height)
+    def __init__(self, settings, grid, easy_spin_core, gravity_core):
+        self.grid = grid
+        self._gravity_core = gravity_core
+        self._easy_spin_core = easy_spin_core
+        self.renderer_core = RendererCore(settings, self)
+
         self.tetrimino = None
         self.tetrimino_hold = None
         self.tetrimino_ghost = None
+
         self.queue = deque([])
-        self.renderer_core = RendererCore(settings, self)
-
-        self._use_easy_spin = settings.use_easy_spin
-        self.easy_spin = None
-        if self._use_easy_spin:
-            self.easy_spin = EasySpinEngine(settings)
-
         self._fill_queue(settings.queue_size)
 
-        self._game_speed = settings.game_speed
         self._gravity_speed = settings.gravity_speed
-        self._use_gravity = settings.use_gravity
-        if self._use_gravity:
-            self._gravity = GravityEngine(self.grid)
 
-        self._can_hold = False
         self._spawn_tetrimino()
 
     def _fill_queue(self, count):
@@ -69,9 +62,9 @@ class GameCore:
         w, h = self.grid.measures
         self.renderer_core.make_render_request(
             (RenderRequest.line_clear, (w, h, lines)))
-        if self._use_gravity:
+        if self._gravity_core:
             GridUtils.clear_lines(self.grid, lines)
-            self._gravity.regenerate_grid()
+            self._gravity_core.regenerate_grid()
         GridUtils.remove_lines(self.grid, lines)
         return True
 
@@ -93,38 +86,40 @@ class GameCore:
     def do_progress(self):
         if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
             self.tetrimino.move_relative((0, 1))
-            self.render()
+            self.trigger_render()
             return True
-
-        if self._use_easy_spin:
-            self.easy_spin.reset()
-            self.easy_spin.start_countdown()
+        self._wait_easy_spin()
 
         for coords, value in self.tetrimino:
             self.grid.set_cell(coords, value)
         self.tetrimino = None
         self.tetrimino_ghost = None
 
-        if self._clear_lines() and self._use_gravity:
-            self.render()
-            time.sleep(self._gravity_speed)
-            self._progress_gravity()
+        self._clear_lines() and self._trigger_gravity()
 
-        self.render()
+        self.trigger_render()
         return self._spawn_tetrimino()
 
-    def _progress_gravity(self):
-        change = True
-        while change:
-            change = False
-            while self._gravity.do_progress():
-                self.render()
+    def _wait_easy_spin(self):
+        if self._easy_spin_core:
+            self._easy_spin_core.reset()
+            self._easy_spin_core.start_countdown()
+
+    def _trigger_gravity(self):
+        if not self._gravity_core:
+            return
+        time.sleep(self._gravity_speed)
+        gravity_runs = True
+        while gravity_runs:
+            gravity_runs = False
+            while self._gravity_core.do_progress():
+                self.trigger_render()
                 time.sleep(self._gravity_speed)
-                change = True
+                gravity_runs = True
             if self._clear_lines():
                 time.sleep(self._gravity_speed)
 
-    def render(self):
+    def trigger_render(self):
         self.renderer_core.make_render_request(
             (RenderRequest.full,
                 (copy.copy(self.grid),
