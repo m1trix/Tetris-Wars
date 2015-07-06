@@ -21,26 +21,21 @@ class Controller:
             self._game_core.tetrimino.move_relative((dirx, diry))
             self._game_core.refresh_ghost_tetrimino()
 
-    def _trigger_easy_spin(self):
-        core = self._easy_spin_core
-        core and core.is_active() and core.add_cycle()
-
     def _rotate_tetrimino(self, dir):
+        if self._easy_spin_core and self._easy_spin_core.is_running():
+            if not self._easy_spin_core.add_cycle():
+                return
         TetriminoUtils.rotate(
             self._game_core.tetrimino,
             self._game_core.grid,
             dir)
         self._game_core.refresh_ghost_tetrimino()
-        self._trigger_easy_spin()
 
     def _hard_drop(self):
         TetriminoUtils.hard_drop(
             self._game_core.tetrimino,
             self._game_core.grid)
-        self._timer.turn_off()
-        self._cancel_easy_spin()
-
-    def _cancel_easy_spin(self):
+        self._timer.stop()
         self._easy_spin_core and self._easy_spin_core.hard_drop()
 
     def do_action(self, action):

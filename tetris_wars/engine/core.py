@@ -49,6 +49,7 @@ class GameCore:
 
         self.refresh_ghost_tetrimino()
         self._can_hold = True
+        self._easy_spin_core and self._easy_spin_core.reset()
         return TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1))
 
     def refresh_ghost_tetrimino(self):
@@ -87,8 +88,12 @@ class GameCore:
         if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
             self.tetrimino.move_relative((0, 1))
             self.trigger_render()
+            if not self._easy_spin_core:
+                return True
+            if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
+                return True
+        if self._wait_easy_spin():
             return True
-        self._wait_easy_spin()
 
         for coords, value in self.tetrimino:
             self.grid.set_cell(coords, value)
@@ -101,9 +106,11 @@ class GameCore:
         return self._spawn_tetrimino()
 
     def _wait_easy_spin(self):
-        if self._easy_spin_core:
-            self._easy_spin_core.reset()
-            self._easy_spin_core.start_countdown()
+        if not self._easy_spin_core:
+            return False
+        if self._easy_spin_core.is_running():
+            return True
+        return self._easy_spin_core.start()
 
     def _trigger_gravity(self):
         if not self._gravity_core:

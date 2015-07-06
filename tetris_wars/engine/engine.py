@@ -31,7 +31,7 @@ class Engine:
         return GravityCore(grid)
 
     def _progress_game(self):
-        self._timer.wait()
+        self._timer.start().wait()
         self._is_running = self._game_core.do_progress()
 
     def execute(self):

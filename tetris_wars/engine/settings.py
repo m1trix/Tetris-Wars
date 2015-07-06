@@ -14,4 +14,4 @@ class Settings:
 
         self.use_easy_spin = True
         self.easy_spin_limit = 20
-        self.easy_spin_timeout = 0.25
+        self.easy_spin_timeout = 0.50
