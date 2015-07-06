@@ -1,6 +1,19 @@
 from enum import Enum
 
 
+class ImmutableGrid():
+
+    def __init__(self, grid):
+        self._grid = grid
+
+    @property
+    def measures(self):
+        return self._grid.measures
+
+    def get_cell(self, coords):
+        return self._grid.get_cell(coords)
+
+
 class Grid:
 
     def __init__(self, width, height):
@@ -25,6 +38,9 @@ class Grid:
     @property
     def measures(self):
         return self._measures
+
+    def immutable(self):
+        return ImmutableGrid(self)
 
 
 ROTATION_OPERATORS = [

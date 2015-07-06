@@ -57,6 +57,11 @@ class Tetrimino(SpinGrid):
     def __init__(self, coords, segments, type):
         super(Tetrimino, self).__init__(segments, Segment(type))
         self._coords = coords
+        self._type = type
+
+    @property
+    def type(self):
+        return self._type
 
     @property
     def coords(self):
@@ -72,7 +77,7 @@ class Tetrimino(SpinGrid):
     def get_cell(self, coords):
         coords = self._to_relative_coords(coords)
         if min(coords) < 0 or max(coords) >= self.size:
-            return False
+            return None
         return super(Tetrimino, self).get_cell(coords)
 
     def set_cell(self, coords, value):
@@ -95,6 +100,37 @@ class Tetrimino(SpinGrid):
                 coords = tuple_add(self.coords, (x, y))
                 if self.get_cell(coords):
                     yield (coords, self.get_cell(coords))
+
+    def immutable(self):
+        return ImmutableTetrimino(self)
+
+
+class ImmutableTetrimino():
+
+    def __init__(self, tetrimino):
+        self._tetrimino = tetrimino
+
+    @property
+    def size(self):
+        return self._tetrimino.size
+
+    @property
+    def measures(self):
+        return self._tetrimino.measures
+
+    def get_cell(self, coords):
+        return self._tetrimino.get_cell(coords)
+
+    @property
+    def type(self):
+        return self._tetrimino.type
+
+    @property
+    def coords(self):
+        return self._tetrimino.coords
+
+    def __iter__(self):
+        return iter(self._tetrimino._get_non_empty_cells())
 
 
 class TetriminoUtils:

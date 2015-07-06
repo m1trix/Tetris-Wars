@@ -11,43 +11,30 @@ import time
 
 class GameCore:
 
-    def __init__(self, settings, grid, easy_spin_core, gravity_core):
+    def __init__(self, settings, grid, core_units):
         self.grid = grid
-        self._gravity_core = gravity_core
-        self._easy_spin_core = easy_spin_core
-        self.renderer_core = RendererCore(settings, self)
+        self._generator = core_units[0]
+        self._gravity_core = core_units[1]
+        self._easy_spin_core = core_units[2]
+        self.renderer_core = RendererCore(settings, self, self._generator)
 
         self.tetrimino = None
         self.tetrimino_hold = None
         self.tetrimino_ghost = None
 
-        self.queue = deque([])
-        self._fill_queue(settings.queue_size)
-
         self._gravity_speed = settings.gravity_speed
-
         self._spawn_tetrimino()
-
-    def _fill_queue(self, count):
-        for i in range(count):
-            self.queue.append(self._create_random_tetrimino())
 
     def _reset_tetrimino_position(self):
         pos_x = self.grid.measures[0] // 2
         self.tetrimino.move_absolute((pos_x, 0))
         self.tetrimino.move_relative((-self.tetrimino.size // 2, 0))
 
-    def _create_random_tetrimino(self):
-        types = list(Tetrimino.Type)
-        type = types[randint(0, len(types) - 1)]
-        return Tetrimino.create(type, (0, 0))
-
     def _spawn_tetrimino(self):
-        self.tetrimino = self.queue.popleft()
-        self.queue.append(self._create_random_tetrimino())
+        self.tetrimino = self._generator.generate_tetrimino()
         self._reset_tetrimino_position()
-
         self.refresh_ghost_tetrimino()
+
         self._can_hold = True
         self._easy_spin_core and self._easy_spin_core.reset()
         return TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1))
@@ -61,8 +48,9 @@ class GameCore:
         if not lines:
             return False
         w, h = self.grid.measures
+        self._generator.clear_lines(len(lines))
         self.renderer_core.make_render_request(
-            (RenderRequest.line_clear, (w, h, lines)))
+            RenderRequest.line_clear, (w, h, lines))
         if self._gravity_core:
             GridUtils.clear_lines(self.grid, lines)
             self._gravity_core.regenerate_grid()
@@ -71,6 +59,7 @@ class GameCore:
 
     def hold_tetrimino(self):
         if not self._can_hold:
+            self.renderer_core.make_render_request(RenderRequest.cannot_hold)
             return
         hold = self.tetrimino_hold
         self.tetrimino_hold = self.tetrimino
@@ -127,10 +116,4 @@ class GameCore:
                 time.sleep(self._gravity_speed)
 
     def trigger_render(self):
-        self.renderer_core.make_render_request(
-            (RenderRequest.full,
-                (copy.copy(self.grid),
-                    copy.copy(self.tetrimino),
-                    copy.copy(self.tetrimino_ghost),
-                    copy.copy(self.tetrimino_hold),
-                    copy.copy(self.queue))))
+        self.renderer_core.make_render_request(RenderRequest.full)

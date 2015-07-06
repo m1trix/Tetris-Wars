@@ -1,34 +1,59 @@
-from threading import Thread
-from collections import deque
 import time
 import copy
+from enum import Enum
+from threading import Thread
+from collections import deque
+from engine.grid import ImmutableGrid
 
 
-class RenderRequest:
+class RenderRequest(Enum):
     full = 'full',
-    line_clear = 'line_clear'
+    line_clear = 'line_clear',
+    cannot_hold = 'cannot_hold'
 
 
 class RendererCore:
 
-    def __init__(self, settings, game_core):
+    def __init__(self, settings, game_core, generator_core):
+        self.grid = ImmutableGrid(game_core.grid)
         self._game_core = game_core
+        self._generator = generator_core
         self._line_clear_speed = settings.line_clear_speed
-        self._render_requests = deque([])
+        self._requests_count = len(list(RenderRequest))
+        self._render_requests = [None] * self._requests_count
+        self._priorities = {
+            RenderRequest.full: 2,
+            RenderRequest.cannot_hold: 1,
+            RenderRequest.line_clear: 0
+        }
 
-    def make_render_request(self, request):
-        type, arguments = request
-        if type == RenderRequest.line_clear:
-            self._render_requests = deque([])
-        self._render_requests.append(request)
+    def get_tetrimino(self):
+        return (self._game_core.tetrimino
+                and self._game_core.tetrimino.immutable())
 
-    def get_grid_measures(self):
-        return self._game_core.grid.measures
+    def get_tetrimino_ghost(self):
+        return (self._game_core.tetrimino_ghost
+                and self._game_core.tetrimino_ghost.immutable())
+
+    def get_tetrimino_hold(self):
+        return (self._game_core.tetrimino_hold
+                and self._game_core.tetrimino_hold.immutable())
+
+    def get_queue(self):
+        return (self._generator.queue
+                and copy.copy(self._generator.queue))
+
+    def make_render_request(self, type, arguments=None):
+        priority = self._priorities[type]
+        self._render_requests[priority] = (type, arguments)
 
     def get_render_request(self):
-        if not self._render_requests:
-            return None
-        return self._render_requests.popleft()
+        for i in range(self._requests_count):
+            if self._render_requests[i]:
+                request = self._render_requests[i]
+                self._render_requests[i] = None
+                return request
+        return None
 
     @property
     def line_clear_speed(self):
