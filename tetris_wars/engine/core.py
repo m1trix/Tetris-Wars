@@ -45,12 +45,12 @@ class GameCore:
 
     def _clear_lines(self):
         lines = GridUtils.get_full_lines(self.grid)
+        self._generator.clear_lines(len(lines))
         if not lines:
             return False
         w, h = self.grid.measures
-        self._generator.clear_lines(len(lines))
         self.renderer_core.make_render_request(
-            RenderRequest.line_clear, (w, h, lines))
+            RenderRequest.line_clear, (lines, ))
         if self._gravity_core:
             GridUtils.clear_lines(self.grid, lines)
             self._gravity_core.regenerate_grid()

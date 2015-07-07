@@ -39,9 +39,8 @@ class RendererCore:
         return (self._game_core.tetrimino_hold
                 and self._game_core.tetrimino_hold.immutable())
 
-    def get_queue(self):
-        return (self._generator.queue
-                and copy.copy(self._generator.queue))
+    def get_generator_core(self):
+        return self._generator
 
     def make_render_request(self, type, arguments=None):
         priority = self._priorities[type]

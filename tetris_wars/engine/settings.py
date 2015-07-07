@@ -4,7 +4,7 @@ class Settings:
         self.grid_width = 10
         self.grid_height = 22
 
-        self.queue_size = 0
+        self.queue_size = 5
         self.tetrimino_repetition_limit = 2
 
         self.game_speed = 0.25

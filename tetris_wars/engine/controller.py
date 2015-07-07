@@ -49,6 +49,7 @@ class Controller:
             self._rotate_tetrimino(Rotation.clockwise)
         elif action == Action.hard_drop:
             self._hard_drop()
+            return
         elif action == Action.soft_drop_on:
             self._timer.soft_drop_on()
         elif action == Action.soft_drop_off:

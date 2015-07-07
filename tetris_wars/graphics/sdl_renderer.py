@@ -1,3 +1,4 @@
+import os
 from sdl2 import *
 from sdl2.ext import Window
 from sdl2.ext import Color
@@ -79,10 +80,10 @@ class SdlRenderer(Renderer):
         for ((x, y), value) in tetrimino:
             sx, sy = (ox + (1 + x) * SQUARE_SIZE,
                       oy + (1 + y) * SQUARE_SIZE)
-            self._draw_tetrimino(tetrimino, (x, y), (sx, sy), None, SQUARE_SIZE)
+            self._draw_tetrimino(tetrimino, (x, y), (sx, sy), SQUARE_SIZE)
 
     def _draw_queue(self):
-        queue = self._renderer_core.get_queue()
+        queue = self._renderer_core.get_generator_core().queue
         if not queue:
             return
         oqx, oqy = self._queue_offset
@@ -90,22 +91,25 @@ class SdlRenderer(Renderer):
         for tetrimino in queue:
             SDL_FillRect(
                 self._surface,
-                SDL_Rect(
-                    oqx * SQUARE_SIZE,
-                    (oqy + 4 * i) * SQUARE_SIZE,
-                    SQUARE_SIZE * 3,
-                    SQUARE_SIZE * 3),
+                SDL_Rect(oqx * SQUARE_SIZE,
+                         (oqy + 4 * i) * SQUARE_SIZE,
+                         SQUARE_SIZE * 3,
+                         SQUARE_SIZE * 3),
                 GRID_COLOR)
             x, y, w, h = TetriminoUtils.calculate_actual_measures(tetrimino)
             ox, oy = (((4 - w - 2 * x) * COMPACT_SQUARE_SIZE) // 2,
                       ((4 - h - 2 * y) * COMPACT_SQUARE_SIZE) // 2)
             for ((x, y), value) in tetrimino:
-                sx, sy = (oqx * SQUARE_SIZE + ox + x * COMPACT_SQUARE_SIZE,
-                          (oqy + 4 * i) * SQUARE_SIZE + oy + y * COMPACT_SQUARE_SIZE)
-                self._draw_tetrimino(tetrimino, (x, y), (sx, sy), None, COMPACT_SQUARE_SIZE)
+                offset_x = oqx * SQUARE_SIZE + ox
+                offset_y = (oqy + 4 * i) * SQUARE_SIZE + oy
+                sx = offset_x + x * COMPACT_SQUARE_SIZE
+                sy = offset_y + y * COMPACT_SQUARE_SIZE
+                self._draw_tetrimino(
+                    tetrimino, (x, y), (sx, sy), COMPACT_SQUARE_SIZE)
             i += 1
 
-    def _draw_tetrimino(self, grid, grid_coords, screen_coords, color, square_size):
+    def _draw_tetrimino(
+            self, grid, grid_coords, screen_coords, square_size, color=None):
         x, y = grid_coords
         gw, gh = grid.measures
         sx, sy = screen_coords
@@ -119,24 +123,57 @@ class SdlRenderer(Renderer):
         if y > 0 and grid.get_cell((x, y - 1)) == segment:
             SDL_FillRect(self._surface, SDL_Rect(xfr, yfr - 1, w, 1), color)
 
-    def render(self, request):
-        type, arguments = request
-        if type == RenderRequest.full:
-            self._full_render()
-        elif type == RenderRequest.line_clear:
-            self._animate_line_clear(arguments)
-        elif type == RenderRequest.cannot_hold:
-            self._animate_cannot_hold(arguments)
+    def _draw_grid(self):
+        w, h = self.grid.measures
+        tetrimino = self._renderer_core.get_tetrimino()
+        ghost = self._renderer_core.get_tetrimino_ghost()
+        SDL_FillRect(
+            self._surface,
+            SDL_Rect(GRID_X_OFFSET * SQUARE_SIZE,
+                     GRID_Y_OFFSET * SQUARE_SIZE,
+                     w * SQUARE_SIZE,
+                     h * SQUARE_SIZE),
+            GRID_COLOR)
+        for y in range(h):
+            for x in range(w):
+                sx, sy = ((x + GRID_X_OFFSET) * SQUARE_SIZE,
+                          (y + GRID_Y_OFFSET) * SQUARE_SIZE)
+
+                if tetrimino and tetrimino.get_cell((x, y)):
+                    self._draw_tetrimino(
+                        tetrimino, (x, y), (sx, sy), SQUARE_SIZE)
+
+                elif ghost and ghost.get_cell((x, y)):
+                    self._draw_tetrimino(
+                        ghost, (x, y), (sx, sy), SQUARE_SIZE, GHOST_COLOR)
+
+                elif self.grid.get_cell((x, y)):
+                    self._draw_tetrimino(
+                        self.grid, (x, y), (sx, sy), SQUARE_SIZE)
+
+    def _draw_score_and_statistics(self):
+        os.system("clear")
+        print("STATISTICS:")
+        generator = self._renderer_core.get_generator_core()
+        for key, value in generator.statistics.items():
+            print("{}: {}".format(key, value))
+        print("\nSCORE:%06d" % generator.score)
+
+    def _full_render(self):
+        self._draw_frame()
+        self._draw_hold()
+        self._draw_queue()
+        self._draw_grid()
+        self._window.refresh()
 
     def _animate_cannot_hold(self, arguments):
         w, h = self.grid.measures
-        sleep_time = 0.05
+        sleep_time = 0.1
         colors = [
             GRID_COLOR,
             Color(0, 220, 50, 47),
             GRID_COLOR,
-            Color(0, 220, 50, 47)
-        ]
+            Color(0, 220, 50, 47)]
         for color in colors:
             self._draw_frame()
             self._draw_hold(color)
@@ -146,7 +183,8 @@ class SdlRenderer(Renderer):
             time.sleep(sleep_time)
 
     def _animate_line_clear(self, arguments):
-        w, h, lines = arguments
+        w, h = self.grid.measures
+        lines = arguments[0]
         sleep_time = self._renderer_core.line_clear_speed / 4
         colors = [
             GRID_COLOR,
@@ -165,33 +203,13 @@ class SdlRenderer(Renderer):
                     colors[i])
             self._window.refresh()
             time.sleep(sleep_time)
+        self._draw_score_and_statistics()
 
-    def _draw_grid(self):
-        w, h = self.grid.measures
-        tetrimino = self._renderer_core.get_tetrimino()
-        ghost = self._renderer_core.get_tetrimino_ghost()
-        SDL_FillRect(
-            self._surface,
-            SDL_Rect(
-                GRID_X_OFFSET * SQUARE_SIZE,
-                GRID_Y_OFFSET * SQUARE_SIZE,
-                w * SQUARE_SIZE,
-                h * SQUARE_SIZE),
-            GRID_COLOR)
-        for y in range(h):
-            for x in range(w):
-                sx, sy = ((x + GRID_X_OFFSET) * SQUARE_SIZE,
-                          (y + GRID_Y_OFFSET) * SQUARE_SIZE)
-                if tetrimino and tetrimino.get_cell((x, y)):
-                    self._draw_tetrimino(tetrimino, (x, y), (sx, sy), None, SQUARE_SIZE)
-                elif ghost and ghost.get_cell((x, y)):
-                    self._draw_tetrimino(ghost, (x, y), (sx, sy), GHOST_COLOR, SQUARE_SIZE)
-                elif self.grid.get_cell((x, y)):
-                    self._draw_tetrimino(self.grid, (x, y), (sx, sy), None, SQUARE_SIZE)
-
-    def _full_render(self):
-        self._draw_frame()
-        self._draw_hold()
-        self._draw_queue()
-        self._draw_grid()
-        self._window.refresh()
+    def render(self, request):
+        type, arguments = request
+        if type == RenderRequest.full:
+            self._full_render()
+        elif type == RenderRequest.line_clear:
+            self._animate_line_clear(arguments)
+        elif type == RenderRequest.cannot_hold:
+            self._animate_cannot_hold(arguments)

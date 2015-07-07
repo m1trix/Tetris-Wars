@@ -1,6 +1,7 @@
 from engine.tetrimino import Tetrimino
 from collections import deque
 from random import randint
+import copy
 
 
 class GeneratorCore:
@@ -11,16 +12,25 @@ class GeneratorCore:
         self.reset()
 
     @property
+    def statistics(self):
+        return copy.copy(self._statistics)
+
+    @property
     def queue(self):
         if not self._queue:
             return []
-        return self._queue
+        return copy.copy(self._queue)
+
+    @property
+    def score(self):
+        return self._score
 
     def reset(self):
-        self._numbers = {}
+        self._statistics = {}
         for type in list(Tetrimino.Type):
-            self._numbers[type] = 0
-        self._lines = 0
+            self._statistics[type] = 0
+        self._score = 0
+        self._is_tetris_scored = False
         self._last_tetriminos = deque([])
         self._queue = None
         if self._queue_size > 0:
@@ -32,14 +42,22 @@ class GeneratorCore:
             self._queue.append(self._spawn_tetrimino())
 
     def clear_lines(self, lines_count):
-        self._lines += lines_count
+        if lines_count < 4:
+            self._is_tetris_scored = False
+            self._score += lines_count * 100
+            return
+        if not self._is_tetris_scored:
+            self._score += 800
+            self._is_tetris_scored = True
+            return
+        self._score += 1200
 
     def generate_tetrimino(self):
         tetrimino = self._spawn_tetrimino()
         if self._queue:
             self._queue.append(tetrimino)
             tetrimino = self._queue.popleft()
-        self._numbers[tetrimino.type] += 1
+        self._statistics[tetrimino.type] += 1
         return tetrimino
 
     def _spawn_tetrimino(self):
