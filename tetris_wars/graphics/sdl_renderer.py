@@ -43,6 +43,8 @@ class SdlRenderer(Renderer):
             Tetrimino.Type.T: Color(0, 211, 54, 130),
             Tetrimino.Type.Z: Color(0, 220, 50, 47)
         }
+        self._draw_score_and_statistics()
+        self._full_render()
 
     @property
     def grid(self):

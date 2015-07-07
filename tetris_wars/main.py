@@ -1,9 +1,9 @@
-from engine.settings import Settings
+import time
+import threading
 from engine.engine import Engine
+from engine.settings import Settings
 from graphics.sdl_renderer import SdlRenderer
 from graphics.sdl_listener import SdlActionListener
-import threading
-import time
 
 
 def main():
