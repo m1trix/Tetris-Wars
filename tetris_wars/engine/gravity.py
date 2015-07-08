@@ -1,6 +1,6 @@
 from collections import deque
-from engine.tetrimino import Segment
-from engine.grid import Grid
+from .grid import Grid
+from .tetrimino import Segment
 
 
 class GravityCore:
@@ -15,13 +15,13 @@ class GravityCore:
         self._marked_segments = Grid(w, h)
         for y in range(h):
             for x in range(w):
-                segment = self._grid.get_cell((x, y))
-                if not segment or self._marked_segments.get_cell((x, y)):
+                segment = self._grid.get_cell(x, y)
+                if not segment or self._marked_segments.get_cell(x, y):
                     continue
-                new_segment = Segment(segment.get_type())
+                new_segment = Segment(segment.type)
                 for x, y in self._calculate_group(x, y, segment):
-                    self._grid.set_cell((x, y), new_segment)
-                    self._marked_segments.set_cell((x, y), True)
+                    self._grid.set_cell(x, y, new_segment)
+                    self._marked_segments.set_cell(x, y, True)
 
     def do_progress(self):
         w, h = self._grid.measures
@@ -29,11 +29,11 @@ class GravityCore:
         change = False
         for y in range(h - 2, -1, -1):
             for x in range(w):
-                segment = self._grid.get_cell((x, y))
+                segment = self._grid.get_cell(x, y)
                 if segment and self._can_segment_fall(x, y, segment):
                     change = True
-                    self._grid.set_cell((x, y + 1), segment)
-                    self._grid.set_cell((x, y), None)
+                    self._grid.set_cell(x, y + 1, segment)
+                    self._grid.set_cell(x, y, None)
         return change
 
     def _calculate_floating_segments(self):
@@ -41,13 +41,13 @@ class GravityCore:
         self._marked_segments = Grid(w, h)
         for y in range(h):
             for x in range(w):
-                segment = self._grid.get_cell((x, y))
+                segment = self._grid.get_cell(x, y)
                 if not segment:
                     continue
                 self._can_segment_fall(x, y, segment)
 
     def _can_segment_fall(self, x, y, segment):
-        if self._marked_segments.get_cell((x, y)):
+        if self._marked_segments.get_cell(x, y):
             return True
         w, h = self._grid.measures
         group = self._calculate_group(x, y, segment)
@@ -58,13 +58,13 @@ class GravityCore:
         for x, y in group:
             if y >= h - 1:
                 return False
-            under = self._grid.get_cell((x, y + 1))
+            under = self._grid.get_cell(x, y + 1)
             if not under or under is segment:
                 continue
             if not self._can_segment_fall(x, y + 1, under):
                 return False
         for x, y in group:
-            self._marked_segments.set_cell((x, y), True)
+            self._marked_segments.set_cell(x, y, True)
         return True
 
     def _calculate_group(self, x, y, segment):
@@ -72,16 +72,16 @@ class GravityCore:
         queue = deque([(x, y)])
         group = set()
         while queue:
-            (x, y) = queue.popleft()
+            x, y = queue.popleft()
             if (x, y) in group:
                 continue
             group.add((x, y))
-            if x > 0 and self._grid.get_cell((x - 1, y)) == segment:
+            if x > 0 and self._grid.get_cell(x - 1, y) == segment:
                 queue.append((x - 1, y))
-            if y > 0 and self._grid.get_cell((x, y - 1)) == segment:
+            if y > 0 and self._grid.get_cell(x, y - 1) == segment:
                 queue.append((x, y - 1))
-            if x < w - 1 and self._grid.get_cell((x + 1, y)) == segment:
+            if x < w - 1 and self._grid.get_cell(x + 1, y) == segment:
                 queue.append((x + 1, y))
-            if y < h - 1 and self._grid.get_cell((x, y + 1)) == segment:
+            if y < h - 1 and self._grid.get_cell(x, y + 1) == segment:
                 queue.append((x, y + 1))
         return group

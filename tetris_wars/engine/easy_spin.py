@@ -1,4 +1,4 @@
-from engine.timer import Timer
+from .timer import Timer
 
 
 class EasySpinCore:

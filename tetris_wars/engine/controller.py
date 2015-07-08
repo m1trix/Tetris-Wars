@@ -1,7 +1,7 @@
 from threading import Thread
-from engine.action import Action
-from engine.tetrimino import TetriminoUtils
-from engine.grid import *
+from .grid import *
+from .action import Action
+from .tetrimino import TetriminoUtils
 import time
 
 
@@ -14,11 +14,8 @@ class Controller:
 
     def _move_tetrimino(self, dirx, diry):
         if TetriminoUtils.can_move(
-            self._game_core.tetrimino,
-            self._game_core.grid,
-            (dirx, diry)
-        ):
-            self._game_core.tetrimino.move_relative((dirx, diry))
+                self._game_core.tetrimino, self._game_core.grid, dirx, diry):
+            self._game_core.tetrimino.move_relative(dirx, diry)
             self._game_core.refresh_ghost_tetrimino()
 
     def _rotate_tetrimino(self, dir):

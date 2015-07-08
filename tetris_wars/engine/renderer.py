@@ -3,7 +3,7 @@ import copy
 from enum import Enum
 from threading import Thread
 from collections import deque
-from engine.grid import ImmutableGrid
+from .grid import ImmutableGrid
 
 
 class RenderRequest(Enum):

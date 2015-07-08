@@ -10,8 +10,8 @@ class ImmutableGrid():
     def measures(self):
         return self._grid.measures
 
-    def get_cell(self, coords):
-        return self._grid.get_cell(coords)
+    def get_cell(self, x, y):
+        return self._grid.get_cell(x, y)
 
 
 class Grid:
@@ -21,19 +21,11 @@ class Grid:
         self._cells = self._create_cells(self._measures)
 
     def _create_cells(self, measures):
-        cells = []
         w, h = measures
+        cells = [None] * h
         for y in range(h):
-            cells.append([None] * w)
+            cells[y] = [None] * w
         return cells
-
-    def get_cell(self, coords):
-        x, y = coords
-        return self._cells[y][x]
-
-    def set_cell(self, coords, value):
-        x, y = coords
-        self._cells[y][x] = value
 
     @property
     def measures(self):
@@ -42,12 +34,18 @@ class Grid:
     def immutable(self):
         return ImmutableGrid(self)
 
+    def get_cell(self, x, y):
+        return self._cells[y][x]
+
+    def set_cell(self, x, y, value):
+        self._cells[y][x] = value
+
 
 ROTATION_OPERATORS = [
-    lambda coords, size: coords,
-    lambda coords, size: (coords[1], size - 1 - coords[0]),
-    lambda coords, size: (size - 1 - coords[0], size - 1 - coords[1]),
-    lambda coords, size: (size - 1 - coords[1], coords[0])
+    lambda x, y, size: (x, y),
+    lambda x, y, size: (y, size - 1 - x),
+    lambda x, y, size: (size - 1 - x, size - 1 - y),
+    lambda x, y, size: (size - 1 - y, x)
 ]
 ROTATION_OPERATORS_COUNT = len(ROTATION_OPERATORS)
 
@@ -61,34 +59,31 @@ class RotationError(Exception):
     pass
 
 
-class SpinGrid(Grid):
+class RotatableGrid(Grid):
 
     def __init__(self, cells, default_cell):
         size = self._calculate_size(cells)
-        super(SpinGrid, self).__init__(size, size)
+        Grid.__init__(self, size, size)
 
-        for coords in cells:
-            Grid.set_cell(self, coords, default_cell)
-
+        for x, y in cells:
+            Grid.set_cell(self, x, y, default_cell)
         self._operator_index = 0
 
     def _calculate_size(self, cells):
-        w, h = 0, 0
-        for x, y in cells:
-            w, h = max(w, x), max(h, y)
-        return max(0, w + 1, h + 1)
+        size = max(max(cells, key=lambda x: max(x))) + 1
+        return size
 
-    def get_cell(self, coords):
-        coords = self._rotate_coords(coords)
-        return Grid.get_cell(self, coords)
+    def get_cell(self, x, y):
+        x, y = self._rotate_coords(x, y)
+        return Grid.get_cell(self, x, y)
 
-    def set_cell(self, coords, value):
-        coords = self._rotate_coords(coords)
-        Grid.set_cell(self, coords, value)
+    def set_cell(self, x, y, value):
+        x, y = self._rotate_coords(x, y)
+        Grid.set_cell(self, x, y, value)
 
-    def _rotate_coords(self, coords):
+    def _rotate_coords(self, x, y):
         rotation_operator = ROTATION_OPERATORS[self._operator_index]
-        return rotation_operator(coords, self._measures[0])
+        return rotation_operator(x, y, self.measures[0])
 
     def rotate(self, dir):
         if dir == Rotation.clockwise:
@@ -97,7 +92,7 @@ class SpinGrid(Grid):
         if dir == Rotation.counterclockwise:
             return self._rotate_grid(-1)
 
-        raise RotationError("Unknown rotation dir {}".format(dir))
+        raise RotationError("Unknown rotation direction {}".format(dir))
 
     def _rotate_grid(self, dir):
         self._operator_index += ROTATION_OPERATORS_COUNT + dir
@@ -107,14 +102,19 @@ class SpinGrid(Grid):
 class GridUtils:
 
     @staticmethod
+    def _is_line_full(grid, y):
+        w, h = grid.measures
+        for x in range(w):
+            if not grid.get_cell(x, y):
+                return False
+        return True
+
+    @staticmethod
     def get_full_lines(grid):
         w, h = grid.measures
         result = []
         for y in range(h):
-            is_full = True
-            for x in range(w):
-                is_full = grid.get_cell((x, y)) and is_full
-            if is_full:
+            if GridUtils._is_line_full(grid, y):
                 result.append(y)
         return result
 
@@ -123,16 +123,20 @@ class GridUtils:
         w, h = grid.measures
         for y in lines:
             for x in range(w):
-                grid.set_cell((x, y), None)
+                grid.set_cell(x, y, None)
 
     @staticmethod
     def remove_lines(grid, lines):
-        counter = grid.measures[1] - 1
+        w, h = grid.measures
+        counter = h - 1
         i = len(lines) - 1
         for y in range(grid.measures[1] - 1, -1, -1):
-            if i >= 0 and y == lines[i]:
+            if i >= 0 and lines.count(y) > 0:
                 i -= 1
                 continue
-            for x in range(grid.measures[0]):
-                grid.set_cell((x, counter), grid.get_cell((x, y)))
+            for x in range(w):
+                grid.set_cell(x, counter, grid.get_cell(x, y))
             counter -= 1
+        for y in range(counter + 1):
+            for x in range(w):
+                grid.set_cell(x, y, None)

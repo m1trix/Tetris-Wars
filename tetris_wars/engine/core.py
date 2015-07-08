@@ -1,12 +1,12 @@
-from engine.tetrimino import *
-from engine.grid import GridUtils
+import time
 from random import randint
 from collections import deque
-from engine.gravity import GravityCore
-from engine.renderer import RendererCore
-from engine.renderer import RenderRequest
-from engine.easy_spin import EasySpinCore
-import time
+from .tetrimino import *
+from .grid import GridUtils
+from .gravity import GravityCore
+from .renderer import RendererCore
+from .renderer import RenderRequest
+from .easy_spin import EasySpinCore
 
 
 class GameCore:
@@ -27,8 +27,8 @@ class GameCore:
 
     def _reset_tetrimino_position(self):
         pos_x = self.grid.measures[0] // 2
-        self.tetrimino.move_absolute((pos_x, 0))
-        self.tetrimino.move_relative((-self.tetrimino.size // 2, 0))
+        self.tetrimino.move_absolute(pos_x, 0)
+        self.tetrimino.move_relative(-self.tetrimino.size // 2, 0)
 
     def _spawn_tetrimino(self):
         self.tetrimino = self._generator.generate_tetrimino()
@@ -37,7 +37,7 @@ class GameCore:
 
         self._can_hold = True
         self._easy_spin_core and self._easy_spin_core.reset()
-        return TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1))
+        return TetriminoUtils.can_move(self.tetrimino, self.grid, 0, 1)
 
     def refresh_ghost_tetrimino(self):
         self.tetrimino_ghost = copy.copy(self.tetrimino)
@@ -64,7 +64,7 @@ class GameCore:
         hold = self.tetrimino_hold
         self.tetrimino_hold = self.tetrimino
         self.tetrimino = hold
-        self.tetrimino_hold.move_absolute((0, 0))
+        self.tetrimino_hold.move_absolute(0, 0)
 
         if self.tetrimino:
             self._reset_tetrimino_position()
@@ -74,18 +74,18 @@ class GameCore:
         self._can_hold = False
 
     def do_progress(self):
-        if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
-            self.tetrimino.move_relative((0, 1))
+        if TetriminoUtils.can_move(self.tetrimino, self.grid, 0, 1):
+            self.tetrimino.move_relative(0, 1)
             self.trigger_render()
             if not self._easy_spin_core:
                 return True
-            if TetriminoUtils.can_move(self.tetrimino, self.grid, (0, 1)):
+            if TetriminoUtils.can_move(self.tetrimino, self.grid, 0, 1):
                 return True
         if self._wait_easy_spin():
             return True
 
-        for coords, value in self.tetrimino:
-            self.grid.set_cell(coords, value)
+        for x, y, value in self.tetrimino:
+            self.grid.set_cell(x, y, value)
         self.tetrimino = None
         self.tetrimino_ghost = None
 

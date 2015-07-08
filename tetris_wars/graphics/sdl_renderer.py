@@ -1,4 +1,5 @@
 import os
+import time
 from sdl2 import *
 from sdl2.ext import Window
 from sdl2.ext import Color
@@ -7,7 +8,6 @@ from engine.renderer import Renderer
 from engine.renderer import RenderRequest
 from engine.tetrimino import Tetrimino
 from engine.tetrimino import TetriminoUtils
-import time
 
 
 GRID_X_OFFSET = 6
@@ -79,7 +79,7 @@ class SdlRenderer(Renderer):
         x, y, w, h = TetriminoUtils.calculate_actual_measures(tetrimino)
         ox, oy = (((4 - w - 2 * x) * SQUARE_SIZE) // 2,
                   ((4 - h - 2 * y) * SQUARE_SIZE) // 2)
-        for ((x, y), value) in tetrimino:
+        for x, y, value in tetrimino:
             sx, sy = (ox + (1 + x) * SQUARE_SIZE,
                       oy + (1 + y) * SQUARE_SIZE)
             self._draw_tetrimino(tetrimino, (x, y), (sx, sy), SQUARE_SIZE)
@@ -101,7 +101,7 @@ class SdlRenderer(Renderer):
             x, y, w, h = TetriminoUtils.calculate_actual_measures(tetrimino)
             ox, oy = (((4 - w - 2 * x) * COMPACT_SQUARE_SIZE) // 2,
                       ((4 - h - 2 * y) * COMPACT_SQUARE_SIZE) // 2)
-            for ((x, y), value) in tetrimino:
+            for x, y, value in tetrimino:
                 offset_x = oqx * SQUARE_SIZE + ox
                 offset_y = (oqy + 4 * i) * SQUARE_SIZE + oy
                 sx = offset_x + x * COMPACT_SQUARE_SIZE
@@ -115,14 +115,14 @@ class SdlRenderer(Renderer):
         x, y = grid_coords
         gw, gh = grid.measures
         sx, sy = screen_coords
-        segment = grid.get_cell(grid_coords)
-        color = color or self._colors[segment.get_type()]
+        segment = grid.get_cell(x, y)
+        color = color or self._colors[segment.type]
 
         xfr, yfr, w, h = sx + 1, sy + 1, square_size - 1, square_size - 1
         SDL_FillRect(self._surface, SDL_Rect(xfr, yfr, w, h), color)
-        if x > 0 and grid.get_cell((x - 1, y)) == segment:
+        if x > 0 and grid.get_cell(x - 1, y) == segment:
             SDL_FillRect(self._surface, SDL_Rect(xfr - 1, yfr, 1, h), color)
-        if y > 0 and grid.get_cell((x, y - 1)) == segment:
+        if y > 0 and grid.get_cell(x, y - 1) == segment:
             SDL_FillRect(self._surface, SDL_Rect(xfr, yfr - 1, w, 1), color)
 
     def _draw_grid(self):
@@ -141,25 +141,26 @@ class SdlRenderer(Renderer):
                 sx, sy = ((x + GRID_X_OFFSET) * SQUARE_SIZE,
                           (y + GRID_Y_OFFSET) * SQUARE_SIZE)
 
-                if tetrimino and tetrimino.get_cell((x, y)):
+                if tetrimino and tetrimino.get_cell(x, y):
                     self._draw_tetrimino(
                         tetrimino, (x, y), (sx, sy), SQUARE_SIZE)
 
-                elif ghost and ghost.get_cell((x, y)):
+                elif ghost and ghost.get_cell(x, y):
                     self._draw_tetrimino(
                         ghost, (x, y), (sx, sy), SQUARE_SIZE, GHOST_COLOR)
 
-                elif self.grid.get_cell((x, y)):
+                elif self.grid.get_cell(x, y):
                     self._draw_tetrimino(
                         self.grid, (x, y), (sx, sy), SQUARE_SIZE)
 
     def _draw_score_and_statistics(self):
-        os.system("clear")
-        print("STATISTICS:")
-        generator = self._renderer_core.get_generator_core()
-        for key, value in generator.statistics.items():
-            print("{}: {}".format(key, value))
-        print("\nSCORE:%06d" % generator.score)
+        return
+        # os.system("clear")
+        # print("STATISTICS:")
+        # generator = self._renderer_core.get_generator_core()
+        # for key, value in generator.statistics.items():
+        #     print("{}: {}".format(key, value))
+        # print("\nSCORE:%06d" % generator.score)
 
     def _full_render(self):
         self._draw_frame()

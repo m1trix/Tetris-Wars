@@ -1,7 +1,7 @@
-from engine.tetrimino import Tetrimino
-from collections import deque
-from random import randint
 import copy
+from random import randint
+from collections import deque
+from .tetrimino import *
 
 
 class GeneratorCore:
@@ -66,7 +66,7 @@ class GeneratorCore:
         while is_repeated:
             types = list(Tetrimino.Type)
             type = types[randint(0, len(types) - 1)]
-            tetrimino = Tetrimino.create(type, (0, 0))
+            tetrimino = create_tetrimino(type, 0, 0)
             if not self._last_tetriminos:
                 is_repeated = False
             for t in self._last_tetriminos:

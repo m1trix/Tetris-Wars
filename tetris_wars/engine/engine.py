@@ -1,11 +1,11 @@
-from engine.grid import Grid
-from engine.core import GameCore
-from engine.timer import GameTimer
-from engine.gravity import GravityCore
-from engine.renderer import RendererCore
-from engine.controller import Controller
-from engine.easy_spin import EasySpinCore
-from engine.generator import GeneratorCore
+from .grid import Grid
+from .core import GameCore
+from .timer import GameTimer
+from .gravity import GravityCore
+from .renderer import RendererCore
+from .controller import Controller
+from .easy_spin import EasySpinCore
+from .generator import GeneratorCore
 
 
 class Engine:

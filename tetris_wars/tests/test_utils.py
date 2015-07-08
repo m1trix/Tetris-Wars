@@ -1,5 +1,5 @@
 import unittest
-from engine.utils import *
+from ..engine.utils import *
 
 
 class TestEngineUtils(unittest.TestCase):
