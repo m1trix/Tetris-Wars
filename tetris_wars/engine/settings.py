@@ -1,19 +1,30 @@
 class Settings:
 
     def __init__(self):
-        self.grid_width = 10
-        self.grid_height = 22
+        self._settings = {
+            'grid': {
+                'width': 10,
+                'height': 22
+            },
+            'generator': {
+                'queue_size': 5,
+                'repetition_limit': 2
+            },
+            'game': {
+                'speed': 0.25,
+                'soft_drop_speed': 0.05,
+                'line_clear_speed': 0.20
+            },
+            'gravity': {
+                'use': True,
+                'speed': 0.25
+            },
+            'easy_spin': {
+                'use': True,
+                'limit': 20,
+                'timeout': 0.50
+            }
+        }
 
-        self.queue_size = 5
-        self.tetrimino_repetition_limit = 2
-
-        self.game_speed = 0.25
-        self.soft_drop_speed = 0.05
-        self.line_clear_speed = 0.20
-
-        self.use_gravity = True
-        self.gravity_speed = 0.25
-
-        self.use_easy_spin = True
-        self.easy_spin_limit = 20
-        self.easy_spin_timeout = 0.50
+    def __getitem__(self, key):
+        return self._settings[key]

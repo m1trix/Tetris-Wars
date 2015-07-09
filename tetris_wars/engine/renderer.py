@@ -18,7 +18,7 @@ class RendererCore:
         self.grid = ImmutableGrid(game_core.grid)
         self._game_core = game_core
         self._generator = generator_core
-        self._line_clear_speed = settings.line_clear_speed
+        self._line_clear_speed = settings['game']['line_clear_speed']
         self._requests_count = len(list(RenderRequest))
         self._render_requests = [None] * self._requests_count
         self._priorities = {

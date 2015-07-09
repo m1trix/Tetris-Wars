@@ -23,7 +23,7 @@ class GameCore:
         self.tetrimino_hold = None
         self.tetrimino_ghost = None
 
-        self._gravity_speed = settings.gravity_speed
+        self._gravity_speed = settings['gravity']['speed']
         self._spawn_tetrimino()
 
     def _reset_tetrimino_position(self):

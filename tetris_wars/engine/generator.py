@@ -8,18 +8,19 @@ from .statistics import StatisticsCore
 class GeneratorCore:
 
     def __init__(self, settings):
-        self._repeat_limit = max(2, settings.tetrimino_repetition_limit)
-        self._queue_size = max(0, settings.queue_size)
+        self._repeat_limit = max(2, settings['generator']['repetition_limit'])
+        self._queue_size = max(0, settings['generator']['queue_size'])
         self._statistics_core = StatisticsCore()
-        self.reset()
-
-    def reset(self):
         self._statistics_core.reset()
         self._last_tetriminos = deque([])
         self._queue = None
         if self._queue_size > 0:
             self._queue = deque([])
             self._fill_queue()
+
+    def _fill_queue(self):
+        for i in range(self._queue_size):
+            self._queue.append(self._spawn_tetrimino())
 
     @property
     def statistics_core(self):
@@ -29,11 +30,7 @@ class GeneratorCore:
     def queue(self):
         if not self._queue:
             return []
-        return copy.copy(self._queue)
-
-    def _fill_queue(self):
-        for i in range(self._queue_size):
-            self._queue.append(self._spawn_tetrimino())
+        return (x for x in self._queue)
 
     def generate_tetrimino(self):
         tetrimino = self._spawn_tetrimino()
@@ -43,20 +40,19 @@ class GeneratorCore:
         self._statistics_core.note_tetrimino_spawn(tetrimino)
         return tetrimino
 
+    def _create_random_tetrimino(self):
+        types = list(Tetrimino.Type)
+        type = types[randint(0, len(types) - 1)]
+        return create_tetrimino(type, 0, 0)
+
     def _spawn_tetrimino(self):
-        is_repeated = True
         tetrimino = None
-        while is_repeated:
-            types = list(Tetrimino.Type)
-            type = types[randint(0, len(types) - 1)]
-            tetrimino = create_tetrimino(type, 0, 0)
-            if not self._last_tetriminos:
-                is_repeated = False
-            for t in self._last_tetriminos:
-                if t.type != tetrimino.type:
-                    is_repeated = False
-                    break
-        self._last_tetriminos.append(tetrimino)
+        while True:
+            tetrimino = self._create_random_tetrimino()
+            if (self._last_tetriminos.count(tetrimino.type)
+                    < self._repeat_limit):
+                break
+        self._last_tetriminos.append(tetrimino.type)
         if len(self._last_tetriminos) > self._repeat_limit:
             self._last_tetriminos.popleft()
         return tetrimino

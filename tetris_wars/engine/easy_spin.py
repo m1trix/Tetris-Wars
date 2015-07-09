@@ -4,9 +4,9 @@ from .timer import Timer
 class EasySpinCore:
 
     def __init__(self, settings):
-        self._limit = settings.easy_spin_limit
+        self._limit = settings['easy_spin']['limit']
         self._counter = 0
-        self._timer = Timer(settings.easy_spin_timeout)
+        self._timer = Timer(settings['easy_spin']['timeout'])
         self._is_hard_drop = False
 
     def start(self):

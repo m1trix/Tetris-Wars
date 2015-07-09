@@ -44,9 +44,9 @@ class Timer():
 class GameTimer(Timer):
 
     def __init__(self, settings):
-        super(GameTimer, self).__init__(settings.game_speed)
-        self._game_speed = settings.game_speed
-        self._soft_drop_speed = settings.soft_drop_speed
+        super(GameTimer, self).__init__(settings['game']['speed'])
+        self._game_speed = settings['game']['speed']
+        self._soft_drop_speed = settings['game']['soft_drop_speed']
 
     def soft_drop_on(self):
         self._timeout = self._soft_drop_speed

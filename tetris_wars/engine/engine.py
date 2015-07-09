@@ -22,15 +22,15 @@ class Engine:
             (self._game_core, easy_spin_core, self._timer))
 
     def _create_grid(self, settings):
-        return Grid(settings.grid_width, settings.grid_height)
+        return Grid(settings['grid']['width'], settings['grid']['height'])
 
     def _create_easy_spin_core(self, settings):
-        if not settings.use_easy_spin:
+        if not settings['easy_spin']['use']:
             return None
         return EasySpinCore(settings)
 
     def _create_gravity_core(self, settings, grid):
-        if not settings.use_gravity:
+        if not settings['gravity']['use']:
             return None
         return GravityCore(grid)
 
