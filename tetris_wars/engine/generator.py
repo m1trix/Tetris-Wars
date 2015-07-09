@@ -2,6 +2,7 @@ import copy
 from random import randint
 from collections import deque
 from .tetrimino import *
+from .statistics import StatisticsCore
 
 
 class GeneratorCore:
@@ -9,11 +10,20 @@ class GeneratorCore:
     def __init__(self, settings):
         self._repeat_limit = max(2, settings.tetrimino_repetition_limit)
         self._queue_size = max(0, settings.queue_size)
+        self._statistics_core = StatisticsCore()
         self.reset()
 
+    def reset(self):
+        self._statistics_core.reset()
+        self._last_tetriminos = deque([])
+        self._queue = None
+        if self._queue_size > 0:
+            self._queue = deque([])
+            self._fill_queue()
+
     @property
-    def statistics(self):
-        return copy.copy(self._statistics)
+    def statistics_core(self):
+        return self._statistics_core
 
     @property
     def queue(self):
@@ -21,43 +31,16 @@ class GeneratorCore:
             return []
         return copy.copy(self._queue)
 
-    @property
-    def score(self):
-        return self._score
-
-    def reset(self):
-        self._statistics = {}
-        for type in list(Tetrimino.Type):
-            self._statistics[type] = 0
-        self._score = 0
-        self._is_tetris_scored = False
-        self._last_tetriminos = deque([])
-        self._queue = None
-        if self._queue_size > 0:
-            self._queue = deque([])
-            self._fill_queue()
-
     def _fill_queue(self):
         for i in range(self._queue_size):
             self._queue.append(self._spawn_tetrimino())
-
-    def clear_lines(self, lines_count):
-        if lines_count < 4:
-            self._is_tetris_scored = False
-            self._score += lines_count * 100
-            return
-        if not self._is_tetris_scored:
-            self._score += 800
-            self._is_tetris_scored = True
-            return
-        self._score += 1200
 
     def generate_tetrimino(self):
         tetrimino = self._spawn_tetrimino()
         if self._queue:
             self._queue.append(tetrimino)
             tetrimino = self._queue.popleft()
-        self._statistics[tetrimino.type] += 1
+        self._statistics_core.note_tetrimino_spawn(tetrimino)
         return tetrimino
 
     def _spawn_tetrimino(self):

@@ -14,6 +14,7 @@ class GameCore:
     def __init__(self, settings, grid, core_units):
         self.grid = grid
         self._generator = core_units[0]
+        self.statistics_core = self._generator.statistics_core
         self._gravity_core = core_units[1]
         self._easy_spin_core = core_units[2]
         self.renderer_core = RendererCore(settings, self, self._generator)
@@ -45,7 +46,7 @@ class GameCore:
 
     def _clear_lines(self):
         lines = GridUtils.get_full_lines(self.grid)
-        self._generator.clear_lines(len(lines))
+        self.statistics_core.note_lines_clear(len(lines))
         if not lines:
             return False
         w, h = self.grid.measures

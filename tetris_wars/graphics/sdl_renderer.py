@@ -43,7 +43,7 @@ class SdlRenderer(Renderer):
             Tetrimino.Type.T: Color(0, 211, 54, 130),
             Tetrimino.Type.Z: Color(0, 220, 50, 47)
         }
-        self._draw_score_and_statistics()
+        self._draw_statistics()
         self._full_render()
 
     @property
@@ -153,20 +153,20 @@ class SdlRenderer(Renderer):
                     self._draw_tetrimino(
                         self.grid, (x, y), (sx, sy), SQUARE_SIZE)
 
-    def _draw_score_and_statistics(self):
-        return
-        # os.system("clear")
-        # print("STATISTICS:")
-        # generator = self._renderer_core.get_generator_core()
-        # for key, value in generator.statistics.items():
-        #     print("{}: {}".format(key, value))
-        # print("\nSCORE:%06d" % generator.score)
+    def _draw_statistics(self):
+        os.system("clear")
+        print("STATISTICS:")
+        statistics_core = self._renderer_core.statistics_core
+        for key, value in statistics_core.statistics:
+            print("{}: {}".format(key, value))
+        print("\nSCORE:%06d" % statistics_core.score)
 
     def _full_render(self):
         self._draw_frame()
         self._draw_hold()
         self._draw_queue()
         self._draw_grid()
+        self._draw_statistics()
         self._window.refresh()
 
     def _animate_cannot_hold(self, arguments):
@@ -206,7 +206,6 @@ class SdlRenderer(Renderer):
                     colors[i])
             self._window.refresh()
             time.sleep(sleep_time)
-        self._draw_score_and_statistics()
 
     def render(self, request):
         type, arguments = request

@@ -27,6 +27,10 @@ class RendererCore:
             RenderRequest.line_clear: 0
         }
 
+    @property
+    def statistics_core(self):
+        return self._game_core.statistics_core.view
+
     def get_tetrimino(self):
         return (self._game_core.tetrimino
                 and self._game_core.tetrimino.immutable())

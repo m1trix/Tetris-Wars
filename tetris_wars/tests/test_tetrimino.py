@@ -108,4 +108,9 @@ class TestTetriminoUtils(unittest.TestCase):
         self.assertEquals(self.tetrimino.coords, (0, -1))
 
     def test_calculate_actual_measures(self):
-        
+        tetrimino = Tetrimino(
+            Tetrimino.Type.L, 0, 0, [(0, 0), (1, 1), (2, 1), (3, 3)])
+        tetrimino.set_cell(0, 0, None)
+        tetrimino.set_cell(3, 3, None)
+        measures = TetriminoUtils.calculate_actual_measures(tetrimino)
+        self.assertEqual(measures, (1, 1, 2, 1))
