@@ -27,6 +27,10 @@ class EasySpinCore:
     def is_running(self):
         return self._timer.is_running()
 
+    def hard_reset(self):
+        self._timer.stop().wait()
+        self.reset()
+
     def reset(self):
         self._counter = 0
 

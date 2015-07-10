@@ -106,14 +106,15 @@ class GameCore:
         if not self._can_hold:
             self._renderer_client.request(RenderRequest.cannot_hold)
             return
-        hold = self._held_tetrimino
+        held = self._held_tetrimino
         self._held_tetrimino = self._falling_tetrimino
-        self._falling_tetrimino = hold
+        self._falling_tetrimino = held
         self._held_tetrimino.move_absolute(0, 0)
 
         if self._falling_tetrimino:
             self._reset_tetrimino_position()
             self.refresh_ghost_tetrimino()
+            self._easy_spin_core and self._easy_spin_core.hard_reset()
         else:
             self._spawn_tetrimino()
         self._can_hold = False
