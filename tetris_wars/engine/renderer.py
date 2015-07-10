@@ -12,6 +12,17 @@ class RenderRequest(Enum):
     cannot_hold = 'cannot_hold'
 
 
+class RenderAnimation:
+
+    def __init__(self, requests, index):
+        self._requests = requests
+        self._index = index
+
+    def wait(self):
+        while self._requests[self._index]:
+            time.sleep(0.001)
+
+
 class RendererCore:
 
     def __init__(self, settings, game_core, generator_core):
@@ -49,6 +60,7 @@ class RendererCore:
     def make_render_request(self, type, arguments=None):
         priority = self._priorities[type]
         self._render_requests[priority] = (type, arguments)
+        return RenderAnimation(self._render_requests, priority)
 
     def get_render_request(self):
         for i in range(self._requests_count):
