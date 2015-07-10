@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ImmutableGrid():
+class GridView():
 
     def __init__(self, grid):
         self._grid = grid
@@ -31,8 +31,9 @@ class Grid:
     def measures(self):
         return self._measures
 
-    def immutable(self):
-        return ImmutableGrid(self)
+    @property
+    def view(self):
+        return GridView(self)
 
     def get_cell(self, x, y):
         return self._cells[y][x]

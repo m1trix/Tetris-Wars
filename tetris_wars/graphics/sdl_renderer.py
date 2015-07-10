@@ -46,12 +46,8 @@ class SdlRenderer(Renderer):
         self._draw_statistics()
         self._full_render()
 
-    @property
-    def grid(self):
-        return self._renderer_core.grid
-
     def _calculate_window_size(self):
-        w, h = self.grid.measures
+        w, h = self._game_view.grid.measures
         self._screen_measures = (
             (w + GRID_X_OFFSET + 6) * SQUARE_SIZE,
             (h + GRID_Y_OFFSET + 1) * SQUARE_SIZE)
@@ -65,7 +61,7 @@ class SdlRenderer(Renderer):
             self._background_color)
 
     def _draw_hold(self, background=GRID_COLOR):
-        tetrimino = self._renderer_core.get_tetrimino_hold()
+        tetrimino = self._game_view.held_tetrimino
         SDL_FillRect(
             self._surface,
             SDL_Rect(
@@ -85,7 +81,7 @@ class SdlRenderer(Renderer):
             self._draw_tetrimino(tetrimino, (x, y), (sx, sy), SQUARE_SIZE)
 
     def _draw_queue(self):
-        queue = self._renderer_core.get_generator_core().queue
+        queue = self._game_view.generator_view.queue
         if not queue:
             return
         oqx, oqy = self._queue_offset
@@ -126,9 +122,9 @@ class SdlRenderer(Renderer):
             SDL_FillRect(self._surface, SDL_Rect(xfr, yfr - 1, w, 1), color)
 
     def _draw_grid(self):
-        w, h = self.grid.measures
-        tetrimino = self._renderer_core.get_tetrimino()
-        ghost = self._renderer_core.get_tetrimino_ghost()
+        w, h = self._game_view.grid.measures
+        tetrimino = self._game_view.falling_tetrimino
+        ghost = self._game_view.ghost_tetrimino
         SDL_FillRect(
             self._surface,
             SDL_Rect(GRID_X_OFFSET * SQUARE_SIZE,
@@ -149,17 +145,17 @@ class SdlRenderer(Renderer):
                     self._draw_tetrimino(
                         ghost, (x, y), (sx, sy), SQUARE_SIZE, GHOST_COLOR)
 
-                elif self.grid.get_cell(x, y):
+                elif self._game_view.grid.get_cell(x, y):
                     self._draw_tetrimino(
-                        self.grid, (x, y), (sx, sy), SQUARE_SIZE)
+                        self._game_view.grid, (x, y), (sx, sy), SQUARE_SIZE)
 
     def _draw_statistics(self):
         os.system("clear")
         print("STATISTICS:")
-        statistics_core = self._renderer_core.statistics_core
-        for key, value in statistics_core.statistics:
+        statistics_view = self._game_view.generator_view.statistics_view
+        for key, value in statistics_view.statistics:
             print("{}: {}".format(key, value))
-        print("\nSCORE:%06d" % statistics_core.score)
+        print("\nSCORE:%06d" % statistics_view.score)
 
     def _full_render(self):
         self._draw_frame()
@@ -170,7 +166,7 @@ class SdlRenderer(Renderer):
         self._window.refresh()
 
     def _animate_cannot_hold(self, arguments):
-        w, h = self.grid.measures
+        w, h = self._game_view.grid.measures
         sleep_time = 0.1
         colors = [
             GRID_COLOR,
@@ -185,10 +181,9 @@ class SdlRenderer(Renderer):
             self._window.refresh()
             time.sleep(sleep_time)
 
-    def _animate_line_clear(self, arguments):
-        w, h = self.grid.measures
-        lines = arguments[0]
-        sleep_time = self._renderer_core.line_clear_speed / 4
+    def _animate_line_clear(self, lines):
+        w, h = self._game_view.grid.measures
+        sleep_time = self._line_clear_speed / 4
         colors = [
             GRID_COLOR,
             LINE_CLEAR_COLOR,

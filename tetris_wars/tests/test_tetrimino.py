@@ -15,34 +15,34 @@ class TestTetrimino(unittest.TestCase):
         self.assertEqual(self.tetrimino.measures, (2, 2))
         self.assertEqual(self.tetrimino.type, Tetrimino.Type.L)
 
-        self.assertEqual(self.tetrimino.immutable().size, 2)
-        self.assertEqual(self.tetrimino.immutable().coords, (5, 5))
-        self.assertEqual(self.tetrimino.immutable().measures, (2, 2))
-        self.assertEqual(self.tetrimino.immutable().type, Tetrimino.Type.L)
+        self.assertEqual(self.tetrimino.view.size, 2)
+        self.assertEqual(self.tetrimino.view.coords, (5, 5))
+        self.assertEqual(self.tetrimino.view.measures, (2, 2))
+        self.assertEqual(self.tetrimino.view.type, Tetrimino.Type.L)
 
     def test_get_cell(self):
         self.assertIsNone(self.tetrimino.get_cell(4, 4))
         self.assertIsNone(self.tetrimino.get_cell(4, 5))
         self.assertIsNone(self.tetrimino.get_cell(5, 4))
 
-        self.assertIsNone(self.tetrimino.immutable().get_cell(4, 4))
-        self.assertIsNone(self.tetrimino.immutable().get_cell(4, 5))
-        self.assertIsNone(self.tetrimino.immutable().get_cell(5, 4))
+        self.assertIsNone(self.tetrimino.view.get_cell(4, 4))
+        self.assertIsNone(self.tetrimino.view.get_cell(4, 5))
+        self.assertIsNone(self.tetrimino.view.get_cell(5, 4))
 
         self.assertIsNone(self.tetrimino.get_cell(6, 6))
         self.assertEqual(self.tetrimino.get_cell(5, 5).type, Tetrimino.Type.L)
 
         self.assertEqual(
-            self.tetrimino.immutable().get_cell(5, 5).type, Tetrimino.Type.L)
-        self.assertIsNone(self.tetrimino.immutable().get_cell(6, 6))
+            self.tetrimino.view.get_cell(5, 5).type, Tetrimino.Type.L)
+        self.assertIsNone(self.tetrimino.view.get_cell(6, 6))
 
         self.assertIsNone(self.tetrimino.get_cell(7, 6))
         self.assertIsNone(self.tetrimino.get_cell(5, 7))
         self.assertIsNone(self.tetrimino.get_cell(7, 8))
 
-        self.assertIsNone(self.tetrimino.immutable().get_cell(7, 6))
-        self.assertIsNone(self.tetrimino.immutable().get_cell(5, 7))
-        self.assertIsNone(self.tetrimino.immutable().get_cell(7, 8))
+        self.assertIsNone(self.tetrimino.view.get_cell(7, 6))
+        self.assertIsNone(self.tetrimino.view.get_cell(5, 7))
+        self.assertIsNone(self.tetrimino.view.get_cell(7, 8))
 
     def test_set_cell(self):
         self.tetrimino.set_cell(5, 5, True)
@@ -63,7 +63,7 @@ class TestTetrimino(unittest.TestCase):
 
         for actual in self.tetrimino:
             self.assertTrue(expected.count(actual) == 1)
-        for actual in self.tetrimino.immutable():
+        for actual in self.tetrimino.view:
             self.assertTrue(expected.count(actual) == 1)
 
 

@@ -1,21 +1,27 @@
+import time
 from threading import Thread
+
+from .renderer import RenderRequest
 from .grid import *
 from .action import Action
 from .tetrimino import TetriminoUtils
-import time
 
 
 class Controller:
 
-    def __init__(self, core_units):
-        self._game_core = core_units[0]
-        self._easy_spin_core = core_units[1]
-        self._timer = core_units[2]
+    def __init__(self, game_core, timer, renderer_client):
+        self._game_core = game_core
+        self._easy_spin_core = game_core.easy_spin_core
+        self._timer = timer
+        self._renderer_client = renderer_client
 
     def _move_tetrimino(self, dirx, diry):
         if TetriminoUtils.can_move(
-                self._game_core.tetrimino, self._game_core.grid, dirx, diry):
-            self._game_core.tetrimino.move_relative(dirx, diry)
+                self._game_core.falling_tetrimino,
+                self._game_core.grid,
+                dirx,
+                diry):
+            self._game_core.falling_tetrimino.move_relative(dirx, diry)
             self._game_core.refresh_ghost_tetrimino()
 
     def _rotate_tetrimino(self, dir):
@@ -23,20 +29,20 @@ class Controller:
             if not self._easy_spin_core.add_cycle():
                 return
         TetriminoUtils.rotate(
-            self._game_core.tetrimino,
+            self._game_core.falling_tetrimino,
             self._game_core.grid,
             dir)
         self._game_core.refresh_ghost_tetrimino()
 
     def _hard_drop(self):
         TetriminoUtils.hard_drop(
-            self._game_core.tetrimino,
+            self._game_core.falling_tetrimino,
             self._game_core.grid)
         self._timer.stop()
         self._easy_spin_core and self._easy_spin_core.hard_drop()
 
     def do_action(self, action):
-        if not self._game_core.tetrimino:
+        if not self._game_core.falling_tetrimino:
             return
         if action == Action.move_left:
             self._move_tetrimino(-1, 0)
@@ -53,7 +59,7 @@ class Controller:
             self._timer.soft_drop_off()
         elif action == Action.hold:
             self._game_core.hold_tetrimino()
-        self._game_core.trigger_render()
+        self._renderer_client.request(RenderRequest.full)
 
 
 class ActionListener:

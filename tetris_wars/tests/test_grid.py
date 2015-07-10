@@ -27,29 +27,29 @@ class TestGrid(unittest.TestCase):
         self.assertFalse(self.grid.get_cell(0, 0))
 
     def test_immutable(self):
-        self.assertIsInstance(self.grid.immutable(), ImmutableGrid)
+        self.assertIsInstance(self.grid.view, GridView)
 
 
 class TestImmutableGrid(unittest.TestCase):
 
     def setUp(self):
         self.grid = Grid(4, 8)
-        self.immutable_grid = ImmutableGrid(self.grid)
+        self.grid_view = self.grid.view
 
     def test_measures(self):
-        self.assertEqual(self.immutable_grid.measures, (4, 8))
+        self.assertEqual(self.grid_view.measures, (4, 8))
 
     def test_get_cell(self):
         self.grid.set_cell(1, 1, 42)
         self.grid.set_cell(3, 3, "String")
-        self.assertEqual(self.immutable_grid.get_cell(1, 1), 42)
-        self.assertEqual(self.immutable_grid.get_cell(3, 3), "String")
+        self.assertEqual(self.grid_view.get_cell(1, 1), 42)
+        self.assertEqual(self.grid_view.get_cell(3, 3), "String")
 
     def test_get_row(self):
         self.grid.set_cell(1, 1, 42)
         expected = (None, 42, None, None)
         for x in range(4):
-            self.assertEqual(self.immutable_grid.get_cell(x, 1), expected[x])
+            self.assertEqual(self.grid_view.get_cell(x, 1), expected[x])
 
 
 class TestSpinGrid(unittest.TestCase):

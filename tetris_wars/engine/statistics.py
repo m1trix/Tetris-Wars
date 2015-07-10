@@ -23,7 +23,7 @@ class StatisticsCore:
 
     @property
     def view(self):
-        return StatisticsCoreView(self)
+        return StatisticsView(self)
 
     def note_tetrimino_spawn(self, tetrimino):
         self._statistics[tetrimino.type] += 1
@@ -40,7 +40,7 @@ class StatisticsCore:
         self._score += 1200
 
 
-class StatisticsCoreView:
+class StatisticsView:
 
     def __init__(self, statistics_core):
         self._statistics_core = statistics_core

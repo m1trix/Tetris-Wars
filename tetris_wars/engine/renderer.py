@@ -3,7 +3,6 @@ import copy
 from enum import Enum
 from threading import Thread
 from collections import deque
-from .grid import ImmutableGrid
 
 
 class RenderRequest(Enum):
@@ -23,13 +22,9 @@ class RenderAnimation:
             time.sleep(0.001)
 
 
-class RendererCore:
+class RendererClient:
 
-    def __init__(self, settings, game_core, generator_core):
-        self.grid = ImmutableGrid(game_core.grid)
-        self._game_core = game_core
-        self._generator = generator_core
-        self._line_clear_speed = settings['game']['line_clear_speed']
+    def __init__(self):
         self._requests_count = len(list(RenderRequest))
         self._render_requests = [None] * self._requests_count
         self._priorities = {
@@ -38,31 +33,12 @@ class RendererCore:
             RenderRequest.line_clear: 0
         }
 
-    @property
-    def statistics_core(self):
-        return self._game_core.statistics_core.view
-
-    def get_tetrimino(self):
-        return (self._game_core.tetrimino
-                and self._game_core.tetrimino.immutable())
-
-    def get_tetrimino_ghost(self):
-        return (self._game_core.tetrimino_ghost
-                and self._game_core.tetrimino_ghost.immutable())
-
-    def get_tetrimino_hold(self):
-        return (self._game_core.tetrimino_hold
-                and self._game_core.tetrimino_hold.immutable())
-
-    def get_generator_core(self):
-        return self._generator
-
-    def make_render_request(self, type, arguments=None):
+    def request(self, type, arguments=None):
         priority = self._priorities[type]
         self._render_requests[priority] = (type, arguments)
         return RenderAnimation(self._render_requests, priority)
 
-    def get_render_request(self):
+    def pop_next_request(self):
         for i in range(self._requests_count):
             if self._render_requests[i]:
                 request = self._render_requests[i]
@@ -70,23 +46,37 @@ class RendererCore:
                 return request
         return None
 
+
+class RendererCore:
+
+    def __init__(self, settings, renderer_client, game_view):
+        self._renderer_client = renderer_client
+        self._game_view = game_view
+        self._line_clear_speed = settings['game']['line_clear_speed']
+
     @property
-    def line_clear_speed(self):
-        return self._line_clear_speed
+    def renderer_client(self):
+        return self._renderer_client
+
+    @property
+    def game_view(self):
+        return self._game_view
 
 
 class Renderer:
 
     def __init__(self, renderer_core):
-        self._renderer_core = renderer_core
-        self._sleep_time = 0.0333
+        self._renderer_client = renderer_core.renderer_client
+        self._game_view = renderer_core.game_view
+        self._line_clear_speed = renderer_core._line_clear_speed
+        self._sleep_time = 1 / 30
 
     def render(self, request):
         return
 
     def _loop(self):
         while self._is_running:
-            request = self._renderer_core.get_render_request()
+            request = self._renderer_client.pop_next_request()
             if request:
                 self.render(request)
             time.sleep(self._sleep_time)

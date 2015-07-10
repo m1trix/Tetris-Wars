@@ -5,13 +5,13 @@ class EasySpinCore:
 
     def __init__(self, settings):
         self._limit = settings['easy_spin']['limit']
-        self._counter = 0
         self._timer = Timer(settings['easy_spin']['timeout'])
-        self._is_hard_drop = False
+        self._is_hard_drop_active = False
+        self._counter = 0
 
     def start(self):
-        if self._is_hard_drop:
-            self._is_hard_drop = False
+        if self._is_hard_drop_active:
+            self._is_hard_drop_active = False
             return False
         if not self._can_spin():
             return False
@@ -39,4 +39,4 @@ class EasySpinCore:
         return True
 
     def hard_drop(self):
-        self._is_hard_drop = True
+        self._is_hard_drop_active = True

@@ -47,6 +47,10 @@ class Tetrimino(RotatableGrid):
         self._coords = (x, y)
 
     @property
+    def view(self):
+        return TetriminoView(self)
+
+    @property
     def type(self):
         return self._type
 
@@ -91,9 +95,6 @@ class Tetrimino(RotatableGrid):
                     nx, ny = tuple_add(self.coords, (x, y))
                     yield (nx, ny, segment)
 
-    def immutable(self):
-        return ImmutableTetrimino(self)
-
 
 def create_tetrimino(type, x, y):
     """ Factory method for the 7 Tetriminos of the game. """
@@ -109,7 +110,7 @@ def create_tetrimino(type, x, y):
     return Tetrimino(type, x, y, tetriminos[type])
 
 
-class ImmutableTetrimino():
+class TetriminoView():
 
     def __init__(self, tetrimino):
         self._tetrimino = tetrimino
@@ -202,3 +203,8 @@ class TetriminoUtils:
             minx = min(minx, x)
             miny = min(miny, y)
         return (minx, miny, maxx - minx + 1, maxy - miny + 1)
+
+    @staticmethod
+    def place_tetrimino(tetrimino, grid):
+        for x, y, segment in tetrimino:
+            grid.set_cell(x, y, segment)

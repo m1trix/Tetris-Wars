@@ -23,6 +23,10 @@ class GeneratorCore:
             self._queue.append(self._spawn_tetrimino())
 
     @property
+    def view(self):
+        return GeneratorVeiw(self)
+
+    @property
     def statistics_core(self):
         return self._statistics_core
 
@@ -56,3 +60,18 @@ class GeneratorCore:
         if len(self._last_tetriminos) > self._repeat_limit:
             self._last_tetriminos.popleft()
         return tetrimino
+
+
+class GeneratorVeiw:
+
+    def __init__(self, generator_core):
+        self._generator_core = generator_core
+        self._statistics_view = generator_core.statistics_core.view
+
+    @property
+    def statistics_view(self):
+        return self._statistics_view
+
+    @property
+    def queue(self):
+        return self._generator_core.queue
