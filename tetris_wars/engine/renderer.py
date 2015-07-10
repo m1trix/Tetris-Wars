@@ -8,7 +8,8 @@ from collections import deque
 class RenderRequest(Enum):
     full = 'full',
     line_clear = 'line_clear',
-    cannot_hold = 'cannot_hold'
+    cannot_hold = 'cannot_hold',
+    game_over = 'game_over'
 
 
 class RenderAnimation:
@@ -28,9 +29,10 @@ class RendererClient:
         self._requests_count = len(list(RenderRequest))
         self._render_requests = [None] * self._requests_count
         self._priorities = {
-            RenderRequest.full: 2,
-            RenderRequest.cannot_hold: 1,
-            RenderRequest.line_clear: 0
+            RenderRequest.full: 3,
+            RenderRequest.cannot_hold: 2,
+            RenderRequest.line_clear: 1,
+            RenderRequest.game_over: 0
         }
 
     def request(self, type, arguments=None):

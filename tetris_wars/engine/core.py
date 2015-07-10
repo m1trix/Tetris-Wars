@@ -135,9 +135,12 @@ class GameCore:
         self._ghost_tetrimino = None
 
         self._clear_lines() and self._trigger_gravity()
-
         self._trigger_render()
-        return self._spawn_tetrimino()
+
+        game_over = not self._spawn_tetrimino()
+        if game_over:
+            self._renderer_client.request(RenderRequest.game_over).wait()
+        return not game_over
 
     def _wait_easy_spin(self):
         if not self._easy_spin_core:

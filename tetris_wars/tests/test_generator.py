@@ -52,11 +52,11 @@ class TestGeneratorCore(TestCase):
             }
         })
 
-        self.assertEqual(generator.queue, [])
+        self.assertEqual(generator.view.queue, [])
         self.assertEqual(tetriminos[0], generator.generate_tetrimino())
         self.assertEqual(tetriminos[1], generator.generate_tetrimino())
         self.assertEqual(tetriminos[3], generator.generate_tetrimino())
 
-        statistics_core = generator.statistics_core
-        self.assertIn((Tetrimino.Type.L, 2), statistics_core.statistics)
-        self.assertIn((Tetrimino.Type.Z, 1), statistics_core.statistics)
+        statistics_view = generator.view.statistics_view
+        self.assertIn((Tetrimino.Type.L, 2), statistics_view.statistics)
+        self.assertIn((Tetrimino.Type.Z, 1), statistics_view.statistics)

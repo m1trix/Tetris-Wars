@@ -202,6 +202,31 @@ class SdlRenderer(Renderer):
             self._window.refresh()
             time.sleep(sleep_time)
 
+    def _animate_game_over(self):
+        self._full_render()
+        sleep_time = 0.10
+        w, h = self._game_view.grid.measures
+        for y in range(h - 1, -1, -1):
+            SDL_FillRect(
+                self._surface,
+                SDL_Rect(
+                    GRID_X_OFFSET * SQUARE_SIZE,
+                    (GRID_Y_OFFSET + y) * SQUARE_SIZE,
+                    w * SQUARE_SIZE,
+                    SQUARE_SIZE),
+                GRID_COLOR)
+            for x in range(w):
+                SDL_FillRect(
+                    self._surface,
+                    SDL_Rect(
+                        (GRID_X_OFFSET + x) * SQUARE_SIZE,
+                        (GRID_Y_OFFSET + y) * SQUARE_SIZE,
+                        SQUARE_SIZE - 1,
+                        SQUARE_SIZE - 1),
+                    GHOST_COLOR)
+            self._window.refresh()
+            time.sleep(sleep_time)
+
     def render(self, request):
         type, arguments = request
         if type == RenderRequest.full:
@@ -210,3 +235,5 @@ class SdlRenderer(Renderer):
             self._animate_line_clear(arguments)
         elif type == RenderRequest.cannot_hold:
             self._animate_cannot_hold(arguments)
+        elif type == RenderRequest.game_over:
+            self._animate_game_over()
